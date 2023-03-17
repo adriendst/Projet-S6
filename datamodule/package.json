@@ -1,0 +1,28 @@
+{
+    "name": "steam-wiki",
+    "version": "1.0.0",
+    "description": "",
+    "main": "source/server.ts",
+    "scripts": {
+        "app": "ts-node ./app",
+        "start": "node ./app",
+        "test": "jest",
+        "build": "rm -rf build && prettier --write source/ && tsc",
+        "build:win": "rd /s /q build 2>nul && prettier --write source/ && npx tsc"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@elastic/elasticsearch": "7.13",
+        "body-parser": "^1.20.2",
+        "csv": "^6.2.8",
+        "dotenv": "^16.0.3",
+        "es7": "npm:@elastic/elasticsearch@^7.17.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.19",
+        "prettier": "^2.8.3",
+        "ts-node": "^10.8.2",
+        "typescript": "^4.7.4"
+    }
+}
