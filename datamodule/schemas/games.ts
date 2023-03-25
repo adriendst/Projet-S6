@@ -1,5 +1,5 @@
 export const GAME_PROPERTIES = {
-    appid: { type: 'string' },
+    appid: { type: 'keyword' },
     name: {
         type: 'text',
         //analyzer: 'ngram_analyzer',
@@ -9,7 +9,7 @@ export const GAME_PROPERTIES = {
         type: 'date',
     },
     english: {
-        type: 'boolean',
+        type: 'integer',
     },
     developer: {
         type: 'text',
@@ -31,6 +31,7 @@ export const GAME_PROPERTIES = {
         type: 'integer',
     },
     categories: {
+        type: 'keyword',
         // type: 'text',
         // fields: {
         //     keyword: {

@@ -3,7 +3,7 @@ import { parse } from 'csv-parse';
 import { Client } from '@elastic/elasticsearch';
 import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import { GAME_PROPERTIES } from './schemas/games';
-import { IGame } from './interfaces/game';
+import { IGame, IRawGameData } from './interfaces/game';
 import csv from 'csv-parser';
 import { ANALYZER_SETTINGS } from './schemas/settings';
 
@@ -53,8 +53,9 @@ const prepare = async (indexData: IIndex) => {
 };
 
 const index = async (indexData: IIndex) => {
+    console.log(`Indexing data from ${indexData.file}`);
     const datasource = fs.createReadStream(`./data/${indexData.file}`).pipe(csv());
-    await esclient.helpers.bulk<IGame>({
+    await esclient.helpers.bulk<IRawGameData>({
         datasource,
         onDocument(doc) {
             return {
@@ -67,6 +68,7 @@ const index = async (indexData: IIndex) => {
         },
         refreshOnCompletion: indexData.name,
     });
+    console.log(`Indexed data from ${indexData.file}`);
 };
 
 const run = async () => {
