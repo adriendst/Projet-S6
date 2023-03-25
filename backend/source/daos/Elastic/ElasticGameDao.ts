@@ -24,6 +24,7 @@ const ElasticGameDao: GameDao = {
     },
 
     searchGamesByName(params: { searchtext: string; page?: number; size?: number; sortOrder?: string }): Promise<any> {
+        const page = Math.max(params.page ?? 1, 1);
         const pageSize = params.size ?? 10;
 
         return new Promise(async (resolve, reject) => {
@@ -44,7 +45,7 @@ const ElasticGameDao: GameDao = {
                                 }
                             }
                         },
-                        from: ((params.page ?? 1) - 1) * pageSize,
+                        from: (page - 1) * pageSize,
                         size: pageSize,
                         sort: [{ name: { order: params.sortOrder ?? 'desc' } }]
                     }
