@@ -1,4 +1,4 @@
-export interface IMovie {
+export type IMovie = {
     id: number;
     name: string;
     thumbnail: string;
@@ -7,4 +7,4 @@ export interface IMovie {
         max: string;
     };
     highlight: boolean;
-}
+};
