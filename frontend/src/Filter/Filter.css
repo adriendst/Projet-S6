@@ -1,0 +1,52 @@
+.divInput{
+    margin-bottom: 5px;
+}
+
+.name{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.nameInputSize{
+    width : 50vh
+}
+
+.ant-picker-panels{
+    display: inline-grid !important;
+}
+
+.ant-picker-dropdown {
+    top: 10vh !important;
+    bottom: 0 !important;
+    left: calc(100% - 90vw) !important;
+    right: 0 !important;
+}
+
+.ant-picker-panel-container{
+    width: 288px !important;
+}
+
+
+.inputSize{
+    width: 275px;
+}
+
+.dateInput{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.filters{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/*.filterDiv{*/
+/*    overflow-y: scroll;*/
+/*}*/

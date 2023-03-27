@@ -1,0 +1,27 @@
+.arrow{
+    position: sticky;
+    bottom: 5vh;
+    left: 85vw; /* Ajout de la propriété right pour placer l'élément à droite */
+    background-color: white;
+    border-radius: 100px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.filterLayout{
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    /*max-height: calc(100vh - 150px);*/
+    background-color: white;
+}
+
+.data{
+    height: calc(100vh - 262px);
+}
+
+.displayButton{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

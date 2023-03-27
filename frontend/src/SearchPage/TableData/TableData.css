@@ -1,0 +1,121 @@
+.header{
+    display: flex;
+    height: 100%;
+}
+
+.rowData{
+    display: flex;
+    height: 100%;
+    cursor: pointer;
+}
+
+.rowData:hover{
+    background-color: darkgray ;
+}
+
+.table{
+    height: 90%;
+    list-style-type: none;
+}
+
+.tableHeader{
+    margin-bottom: 20px;
+    padding-right: 15px;
+    font-weight: bold ;
+}
+
+
+
+@media only screen and (max-width: 2500px) {
+    li > div > div:nth-child(1) {
+        width: 20%;
+    }
+
+    li > div > div:nth-child(2),
+    li > div > div:nth-child(3),
+    li > div > div:nth-child(4),
+    li > div > div:nth-child(5),
+    li > div > div:nth-child(6),
+    li > div > div:nth-child(7),
+    li > div > div:nth-child(8),
+    li > div > div:nth-child(9) {
+        width: 10%;
+    }
+
+}
+
+@media only screen and (max-width: 1400px) {
+    li > div > div:nth-child(2),
+    li > div > div:nth-child(6) {
+        display: none;
+    }
+
+    li > div > div:nth-child(1) {
+        width: 30%;
+    }
+
+    li > div > div:nth-child(3),
+    li > div > div:nth-child(4) {
+        width: 15%;
+    }
+
+    li > div > div:nth-child(5),
+    li > div > div:nth-child(7),
+    li > div > div:nth-child(8),
+    li > div > div:nth-child(9) {
+        width: 10%;
+    }
+
+}
+
+@media only screen and (max-width: 1250px) {
+    li > div > div:nth-child(3),
+    li > div > div:nth-child(8) {
+        display: none;
+    }
+
+    li > div > div:nth-child(4),
+    li > div > div:nth-child(5) {
+        width: 20%;
+    }
+
+    li > div > div:nth-child(7),
+    li > div > div:nth-child(9) {
+        width: 15%;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    li > div > div:nth-child(4),
+    li > div > div:nth-child(7) {
+        display: none;
+    }
+
+    li > div > div:nth-child(1) {
+        width: 40%;
+    }
+
+    li > div > div:nth-child(5),
+    li > div > div:nth-child(9) {
+        width: 30%;
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    li > div > div:nth-child(9) {
+        display: none;
+    }
+
+    li > div > div:nth-child(5),
+    li > div > div:nth-child(1) {
+        width: 50%;
+    }
+}
+
+
+
+.element{
+    display:flex;
+    align-items: center;
+    color: black;
+}

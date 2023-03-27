@@ -16,8 +16,10 @@
         "@elastic/elasticsearch": "7.13",
         "body-parser": "^1.20.2",
         "csv": "^6.2.8",
+        "csv-parser": "^3.0.0",
         "dotenv": "^16.0.3",
-        "es7": "npm:@elastic/elasticsearch@^7.17.0"
+        "es7": "npm:@elastic/elasticsearch@^7.17.0",
+        "json5": "^2.2.3"
     },
     "devDependencies": {
         "nodemon": "^2.0.19",
