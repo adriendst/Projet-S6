@@ -2,22 +2,25 @@ import fs from 'fs';
 import { parse } from 'csv-parse';
 import { Client } from '@elastic/elasticsearch';
 import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
-import { GAME_PROPERTIES } from './schemas/games';
-import { IGame, IRawGameData } from './interfaces/game';
 import csv from 'csv-parser';
+import JSON5 from 'json5';
+import { Transform } from 'stream';
+import { GAME_PROPERTIES } from './schemas/games';
 import { ANALYZER_SETTINGS } from './schemas/settings';
+import { DESCRIPTION_PROPERTIES } from './schemas/description';
+import { SUPPORT_PROPERTIES } from './schemas/support';
+import { MEDIA_PROPERTIES } from './schemas/media';
+import { REQUIREMENTS_PROPERTIES } from './schemas/requirements';
 
 const NUMBER_OF_GAMES = 100;
-
-console.log('Starting');
 
 interface IIndex {
     name: string;
     file: string;
     properties: any;
-    type: string;
-    listFields: Array<string>;
-    booleanFields: Array<string>;
+    // type: string;
+    // listFields: Array<string>;
+    // booleanFields: Array<string>;
 }
 
 const indices = [
@@ -25,19 +28,44 @@ const indices = [
         name: 'games',
         file: 'steam.csv',
         properties: GAME_PROPERTIES,
-        type: 'game_type',
-        listFields: ['platforms', 'categories', 'steamspy_tags', 'genres'],
-        booleanFields: ['english'],
     },
+    {
+        name: 'description',
+        file: 'steam_description_data.csv',
+        properties: DESCRIPTION_PROPERTIES,
+    },
+    // {
+    //     name: 'media',
+    //     file: 'steam_media_data.csv',
+    //     properties: MEDIA_PROPERTIES,
+    // },
+    // {
+    //     name: 'requirements',
+    //     file: 'steam_requirements_data.csv',
+    //     properties: REQUIREMENTS_PROPERTIES,
+    // },
+    // {
+    //     name: 'support',
+    //     file: 'steam_support_info.csv',
+    //     properties: SUPPORT_PROPERTIES,
+    // },
+    // {
+    //     name: 'steamspy',
+    //     file: 'steamspy_tag_data.csv',
+    //     properties: DESCRIPTION_PROPERTIES,
+    // },
 ] as Array<IIndex>;
 
 const elasticUrl = process.env.ELASTIC_URL || 'http://localhost:9200';
 // @ts-expect-error @elastic/elasticsearch
 const esclient: TypedClient = new Client({ node: elasticUrl });
 
-const prepare = async (indexData: IIndex) => {
+const prepare = async (indexData: IIndex, deleteIfExists: boolean): Promise<boolean> => {
     const { body: exists } = await esclient.indices.exists({ index: indexData.name });
-    if (exists) return;
+    if (exists) {
+        if (!deleteIfExists) return false;
+        await esclient.indices.delete({ index: indexData.name });
+    }
 
     await esclient.indices.create({
         index: indexData.name,
@@ -50,12 +78,31 @@ const prepare = async (indexData: IIndex) => {
         },
     });
     console.log(`Created index ${indexData.name}`);
+    return true;
 };
 
-const index = async (indexData: IIndex) => {
+const transformer = new Transform({
+    objectMode: true,
+    transform(chunk, encoding, callback) {
+        const transformedChunk = { ...chunk };
+        if (chunk.appid === undefined) {
+            transformedChunk.appid = chunk.steam_appid;
+            delete transformedChunk.steam_appid;
+        }
+        for (let json of ['screenshots', 'movies', 'pc_requirements', 'mac_requirements', 'linux_requirements']) {
+            if (chunk[json] !== undefined) {
+                if (chunk[json].length === 0) transformedChunk[json] = [];
+                else transformedChunk[json] = JSON5.parse(chunk[json].replace(/True/g, 'true').replace(/False/g, 'false'));
+            }
+        }
+        callback(null, transformedChunk);
+    },
+});
+
+async function index(indexData: IIndex) {
     console.log(`Indexing data from ${indexData.file}`);
-    const datasource = fs.createReadStream(`./data/${indexData.file}`).pipe(csv());
-    await esclient.helpers.bulk<IRawGameData>({
+    const datasource = fs.createReadStream(`./data/${indexData.file}`).pipe(csv()).pipe(transformer);
+    const body = await esclient.helpers.bulk<{ appid: string }>({
         datasource,
         onDocument(doc) {
             return {
@@ -63,24 +110,25 @@ const index = async (indexData: IIndex) => {
             };
         },
         onDrop(doc) {
-            console.log(`Can't index document with id ${doc.document.appid}!`, doc.error);
+            console.log(`Can't index document with id ${doc.document.appid}!`, doc);
             process.exit(1);
         },
-        refreshOnCompletion: indexData.name,
+        // refreshOnCompletion: indexData.name,
     });
-    console.log(`Indexed data from ${indexData.file}`);
-};
+    console.log(`Indexed ${body.total} documents from ${indexData.file} in ${body.time / 1000} seconds`);
+}
 
 const run = async () => {
+    console.log('Starting...');
     for (let indexData of indices) {
         try {
-            await prepare(indexData);
-            await index(indexData);
+            if (await prepare(indexData, true)) await index(indexData);
         } catch (err) {
-            console.error(`An error occurred while creating the index "${index}":`);
+            console.error(`An error occurred while creating the index "${indexData.name}":`);
             console.error(err);
         }
     }
+    console.log('Completed!');
 };
 
 run();

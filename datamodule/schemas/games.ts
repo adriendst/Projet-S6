@@ -1,5 +1,7 @@
 export const GAME_PROPERTIES = {
-    appid: { type: 'keyword' },
+    appid: {
+        type: 'keyword',
+    },
     name: {
         type: 'text',
         //analyzer: 'ngram_analyzer',
