@@ -1,134 +1,107 @@
 import fs from 'fs';
-import { parse } from 'csv-parse';
 import { Client } from '@elastic/elasticsearch';
-import { GAME_SCHEMA } from './schemas/games';
-import { IGame } from './interfaces/game';
+import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
+import csv from 'csv-parser';
+import { GAME_PROPERTIES } from './schemas/games';
 import { ANALYZER_SETTINGS } from './schemas/settings';
-
-const NUMBER_OF_GAMES = 100;
-
-console.log('Starting');
+import { DESCRIPTION_PROPERTIES } from './schemas/description';
+import { SUPPORT_PROPERTIES } from './schemas/support';
+import { MEDIA_PROPERTIES } from './schemas/media';
+import { REQUIREMENTS_PROPERTIES } from './schemas/requirements';
+import { transformer } from './utils/transformer';
 
 interface IIndex {
     name: string;
-    type: string;
     file: string;
-    mapping: any;
-    listFields: Array<string>;
-    booleanFields: Array<string>;
+    properties: any;
 }
 
 const indices = [
     {
         name: 'games',
-        type: 'game_type',
         file: 'steam.csv',
-        mapping: GAME_SCHEMA,
-        listFields: ['platforms', 'categories', 'steamspy_tags', 'genres'],
-        booleanFields: ['english']
-    }
+        properties: GAME_PROPERTIES,
+    },
+    {
+        name: 'description',
+        file: 'steam_description_data.csv',
+        properties: DESCRIPTION_PROPERTIES,
+    },
+    {
+        name: 'media',
+        file: 'steam_media_data.csv',
+        properties: MEDIA_PROPERTIES,
+    },
+    {
+        name: 'requirements',
+        file: 'steam_requirements_data.csv',
+        properties: REQUIREMENTS_PROPERTIES,
+    },
+    {
+        name: 'support',
+        file: 'steam_support_info.csv',
+        properties: SUPPORT_PROPERTIES,
+    },
 ] as Array<IIndex>;
 
 const elasticUrl = process.env.ELASTIC_URL || 'http://localhost:9200';
-const esclient = new Client({ node: elasticUrl });
+// @ts-expect-error @elastic/elasticsearch
+const esclient: TypedClient = new Client({ node: elasticUrl });
 
-const createIndex = async (index: IIndex) => {
+async function prepare(indexData: IIndex, deleteIfExists: boolean): Promise<boolean> {
+    const { body: exists } = await esclient.indices.exists({ index: indexData.name });
+    if (exists) {
+        if (!deleteIfExists) return false;
+        await esclient.indices.delete({ index: indexData.name });
+        console.log(`Deleted index ${indexData.name}`);
+    }
+
     await esclient.indices.create({
-        index: index.name,
+        index: indexData.name,
         body: {
-            mappings: index.mapping
+            mappings: {
+                dynamic: 'strict',
+                properties: indexData.properties,
+            },
             //settings: ANALYZER_SETTINGS
-        }
+        },
     });
-    console.log(`Created index ${index.name}`);
-};
+    console.log(`Created index ${indexData.name}`);
+    return true;
+}
 
-const insertRows = (index: IIndex) => {
-    let dataFields = [] as Array<string>;
-    let count = 0;
-    fs.createReadStream(`./data/${index.file}`)
-        .pipe(parse({ delimiter: ',', to_line: NUMBER_OF_GAMES + 1 }))
-        .on('data', async (row) => {
-            if (dataFields.length === 0) dataFields = row;
-            else {
-                let game: { [key: keyof IGame | string]: any } = {} as IGame;
-                for (let i = 0; i < dataFields.length; i++) {
-                    if (index.booleanFields.includes(dataFields[i])) game[dataFields[i]] = row[i] === '1';
-                    else if (index.listFields.includes(dataFields[i])) game[dataFields[i]] = row[i].split(';');
-                    else if (Number.isNaN(Number(row[i]))) game[dataFields[i]] = row[i];
-                    else {
-                        game[dataFields[i]] = Number(row[i]);
-                    }
-                }
-                const res = await esclient.index({
-                    index: index.name,
-                    id: game.appid,
-                    body: game
-                });
-                count++;
-                console.log(`${count}/${NUMBER_OF_GAMES}`, game.name, 'inserted');
-            }
-        })
-        .on('end', async () => {
-            console.log('finished');
-            await esclient.indices.refresh({ index: 'games' });
-        })
-        .on('error', (error) => {
-            console.log(error.message);
-        });
-};
+async function index(indexData: IIndex) {
+    console.log(`Indexing data from ${indexData.file}`);
+    const datastream = fs.createReadStream(`./data/${indexData.file}`);
+    const datasource = datastream.pipe(csv()).pipe(transformer());
 
-const handleInsert = async () => {
-    for (let index of indices) {
+    const body = await esclient.helpers.bulk<{ appid: string }>({
+        datasource,
+        onDocument(doc) {
+            return {
+                index: { _index: indexData.name, _id: doc.appid },
+            };
+        },
+        onDrop(doc) {
+            console.log(`Can't index document with id ${doc.document.appid}!`, doc);
+            process.exit(1);
+        },
+        refreshOnCompletion: indexData.name,
+    });
+    console.log(`Indexed ${body.total} documents from ${indexData.file} in ${body.time / 1000} seconds`);
+}
+
+async function run() {
+    console.log('Starting...');
+    for (let indexData of indices) {
         try {
-            await createIndex(index);
-            insertRows(index);
+            if (await prepare(indexData, false)) await index(indexData);
         } catch (err) {
-            console.error(`An error occurred while creating the index "${index}":`);
+            console.error(`An error occurred while with the index "${indexData.name}":`);
             console.error(err);
         }
     }
-};
+    console.log('Completed!');
+}
 
-const scanData = (fileName: string, fields: Array<string>) => {
-    const arrayIndiciesMap: Map<string, number> = new Map();
-    const fieldValuesMap: Map<string, Set<string>> = new Map();
-    let isSet = false;
-    fs.createReadStream(`./data/${fileName}`)
-        .pipe(parse({ delimiter: ',' }))
-        .on('data', async (row: Array<string>) => {
-            if (!isSet) {
-                for (const field of fields) {
-                    arrayIndiciesMap.set(
-                        field,
-                        row.findIndex((value: string) => value === field)
-                    );
-                    fieldValuesMap.set(field, new Set());
-                }
-                isSet = true;
-            } else {
-                for (const field of fields) {
-                    for (const value of row[arrayIndiciesMap.get(field)!].split(';')) {
-                        fieldValuesMap.get(field)?.add(value);
-                    }
-                }
-            }
-        })
-        .on('end', async () => {
-            for (const field of fields) {
-                let values = Array.from(fieldValuesMap.get(field) ?? []);
-                values = values.sort((a, b) => a.localeCompare(b));
-                console.log(field, values.length);
-                console.log(field, values.join('" | "'));
-                console.log('\n');
-            }
-            console.log('finished');
-        })
-        .on('error', (error) => {
-            console.log(error.message);
-        });
-};
-
-handleInsert();
-
-// scanData('steam.csv', ['platforms', 'categories', 'steamspy_tags', 'owners', 'genres']);
+run();
