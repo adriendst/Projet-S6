@@ -1,3 +1,9 @@
+## Setup the containers:
+
+```sh
+docker compose -f ./backend/docker/docker-compose.yaml up
+```
+
 ## Start the containers:
 
 ```sh

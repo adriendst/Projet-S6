@@ -1,13 +1,15 @@
 import config from '../../config/config';
-import StatusCode from '../../config/statusCodes';
 import { BaseDao } from '../Daos';
 import { Client } from '@elastic/elasticsearch';
+import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
+import { HTTP_STATUS } from '../../config/http_status';
 
 class ElasticConnector {
-    private esclient: Client;
+    private esclient: TypedClient;
     private static _instance: ElasticConnector | undefined = undefined;
 
     private constructor() {
+        // @ts-expect-error @elastic/elasticsearch
         this.esclient = new Client({ node: config.elastic.url });
     }
 
@@ -20,7 +22,7 @@ class ElasticConnector {
         }
     }
 
-    get client(): Client {
+    get client(): TypedClient {
         return this.esclient;
     }
 
@@ -35,12 +37,12 @@ class ElasticConnector {
 
 export const ElasticBaseDao: BaseDao = {
     destroy: ElasticConnector.instance.destroy,
-    client: ElasticConnector.instance.client
+    client: ElasticConnector.instance.client,
 };
 
 export function NotImplementedFunction(): Promise<never> {
     return new Promise<never>((_, reject) => {
-        reject({ code: StatusCode.NotImplemented, label: 'Not implemented', message: 'This function has not yet been implemented' });
+        reject({ ...HTTP_STATUS.NotImplemented, message: 'This function has not yet been implemented' });
     });
 }
 

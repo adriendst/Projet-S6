@@ -1,6 +1,6 @@
 import { ObjectSchema } from 'joi';
 import { NextFunction, Request, Response } from 'express';
-import StatusCode from '../config/statusCodes';
+import { HTTP_STATUS_CODE } from '../config/http_status';
 
 export const ValidateJoi = (schema: ObjectSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -10,7 +10,7 @@ export const ValidateJoi = (schema: ObjectSchema) => {
                 req.body = body;
                 next();
             })
-            .catch((error) => res.status(StatusCode.UnprocessableEntity).json({ error }));
+            .catch((error) => res.status(HTTP_STATUS_CODE.UnprocessableEntity).json({ error }));
     };
 };
 
@@ -22,6 +22,6 @@ export const ValidateQueryJoi = (schema: ObjectSchema) => {
                 req.query = query;
                 next();
             })
-            .catch((error) => res.status(StatusCode.UnprocessableEntity).json({ error }));
+            .catch((error) => res.status(HTTP_STATUS_CODE.UnprocessableEntity).json({ error }));
     };
 };
