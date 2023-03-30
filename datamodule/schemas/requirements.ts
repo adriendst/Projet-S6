@@ -1,45 +1,54 @@
-export const REQUIREMENTS_PROPERTIES = {
-    appid: {
-        type: 'keyword',
-    },
-    pc_requirements: {
-        type: 'object',
-        properties: {
-            minimum: {
-                type: 'text',
-            },
-            recommended: {
-                type: 'text',
-            },
+import { TypeMapping } from '@elastic/elasticsearch/api/types';
+
+export const REQUIREMENTS_MAPPINGS: TypeMapping = {
+    dynamic: 'strict',
+    properties: {
+        appid: {
+            type: 'keyword',
         },
-    },
-    mac_requirements: {
-        type: 'object',
-        properties: {
-            minimum: {
-                type: 'text',
+        pc_requirements: {
+            type: 'object',
+            properties: {
+                minimum: {
+                    type: 'text',
+                },
+                recommended: {
+                    type: 'text',
+                },
             },
-            recommended: {
-                type: 'text',
-            },
+            enabled: false,
         },
-    },
-    linux_requirements: {
-        type: 'object',
-        properties: {
-            minimum: {
-                type: 'text',
+        mac_requirements: {
+            type: 'object',
+            properties: {
+                minimum: {
+                    type: 'text',
+                },
+                recommended: {
+                    type: 'text',
+                },
             },
-            recommended: {
-                type: 'text',
-            },
+            enabled: false,
         },
-    },
-    minimum: {
-        type: 'text',
-    },
-    recommended: {
-        type: 'text',
-        index: false,
+        linux_requirements: {
+            type: 'object',
+            properties: {
+                minimum: {
+                    type: 'text',
+                },
+                recommended: {
+                    type: 'text',
+                },
+            },
+            enabled: false,
+        },
+        minimum: {
+            type: 'text',
+            index: false,
+        },
+        recommended: {
+            type: 'text',
+            index: false,
+        },
     },
 };

@@ -7,6 +7,7 @@ import {FaLinux, FaWindows, FaApple} from 'react-icons/fa';
 import {AiOutlineStop} from 'react-icons/ai'
 import {Link} from "react-router-dom";
 import AutoSizer from "react-virtualized-auto-sizer";
+
 import {FixedSizeGrid as Grid} from "react-window";
 
 const TileData = () => {
