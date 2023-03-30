@@ -32,8 +32,8 @@ const TableData = () => {
                         itemCount={games.length}
                         style={{overflowX:"hidden"}}
                         itemSize={100}
-                        height={height}
-                        width={width}
+                        height={Number(height)}
+                        width={Number(width)}
                     >
                         {({index, style}) => {
                             return (

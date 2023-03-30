@@ -1,83 +1,133 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Card} from "antd";
 import {State} from "../../store";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import './TileData.css'
 import {FaLinux, FaWindows, FaApple} from 'react-icons/fa';
 import {AiOutlineStop} from 'react-icons/ai'
 import {Link} from "react-router-dom";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {VariableSizeGrid as Grid} from "react-window";
-
-const Cell = ({
-                  columnIndex,
-                  rowIndex,
-                  style
-              }: { columnIndex: number, rowIndex: number, style: React.CSSProperties }) => (
-    <div
-        className={
-            columnIndex % 2
-                ? rowIndex % 2 === 0
-                    ? 'GridItemOdd'
-                    : 'GridItemEven'
-                : rowIndex % 2
-                    ? 'GridItemOdd'
-                    : 'GridItemEven'
-        }
-        style={style}
-    >
-        r{rowIndex}, c{columnIndex}
-    </div>
-);
+import {FixedSizeGrid as Grid} from "react-window";
 
 const TileData = () => {
 
-    const games = useSelector((state: State) => state.steam.game);
-    const columnWidths = new Array(1000)
-        .fill(true)
-        .map(() => 100 + Math.round(Math.random() * 50));
 
-    const columnCount = () => {
-        if(window.innerWidth < 1200){
-            if(window.innerWidth < 600){
+    const games = useSelector((state: State) => state.steam.game);
+
+    const columnCount = (width: number) => {
+        if (width < 1200) {
+            if (width < 600) {
                 return 1
             }
             return 2
-        }
-        else{
+        } else {
             return 3
         }
+
+    }
+    const [scrollTop, setScrollTop] = useState<number>(0);
+
+    const rowHeight = (width: number) => {
+
+        if (1200 < width) {
+            if (1400 > width) {
+                return (Number(width) / columnCount(Number(width)) - 9) / (1.4)
+            }
+            const test = (Number(width) / columnCount(Number(width)) - 9) / (3 / 2)
+            return test
+        }
+        if (width < 1200 && width > 1000) {
+            return (Number(width) / columnCount(Number(width)) - 9) / (1.5)
+        }
+        if (width < 600 && width > 500) {
+            return (Number(width) / columnCount(Number(width)) - 9) / (1.5)
+        }
+
+        if (width < 500) {
+            return (Number(width) / columnCount(Number(width)) - 9) / (1.3)
+        }
+        return (Number(width) / columnCount(Number(width)) - 9) / (1.3)
     }
 
-    const rowCount = () => {
-        console.log(games.length)
-        console.log(games.length / columnCount())
-        return games.length / columnCount()
+    const rowCount = (width: number) => {
+        return games.length / columnCount(Number(width))
     }
 
-    const rowHeights = new Array(1000)
-        .fill(true)
-        .map(() => 25 + Math.round(Math.random() * 50));
+    const addGamesOnScroll = (scrollTop: number, width: number) => {
+        if (scrollTop > (rowHeight(width) * games.length) / columnCount(Number(width)) / 1.10) {
+            console.log("caca")
+        }
+    }
 
     return (
         <div className={'tilePage'}>
             <AutoSizer className={'dqsdqs'}>
                 {({height, width}) => (
                     <Grid
-                        className="Grid"
-                        columnCount={columnCount()}
-                        columnWidth={index => columnWidths[index]}
-                        height={height}
-                        rowCount={rowCount()}
-                        rowHeight={index => rowHeights[index]}
-                        width={width}
+                        columnCount={columnCount(Number(width))}
+                        columnWidth={Number(width) / columnCount(Number(width)) - 7.5}
+                        height={Number(height)}
+                        rowCount={rowCount(Number(width))}
+                        rowHeight={rowHeight(Number(width))}
+                        width={Number(width)}
+                        onScroll={({scrollTop}) => {
+                            addGamesOnScroll(scrollTop, Number(width))
+                        }}
                     >
                         {({columnIndex, rowIndex, style}) => {
-                            const index = columnIndex + rowIndex*3;
-                            console.log(width)
-
+                            const index = columnIndex + rowIndex * columnCount(Number(width));
                             return (
-                                <div style={style}>{index}</div>
+                                <div style={{...style}}>
+                                    <Link to={`/game/${games[index].id}`} className={'Link'}>
+
+                                        <Card cover={<img alt={games[index].name} src={games[index].header_image}/>}
+                                              hoverable style={{width: "100%", height: "100%"}} bordered>
+                                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                                                <div>
+                                                    {games[index].name}
+                                                </div>
+                                                <div style={{
+                                                    display: "flex",
+                                                    width: '100px',
+                                                    justifyContent: "space-between"
+                                                }}>
+                                                    <div style={{display: "flex", alignItems: "center"}}>
+                                                        {games[index].required_age !== 0 ?
+                                                            <div
+                                                                style={{
+                                                                    display: "flex",
+                                                                    alignItems: "center"
+                                                                }}>-{games[index].required_age}
+                                                                <AiOutlineStop/></div> : ""}
+                                                    </div>
+                                                    <div style={{display: "flex", alignItems: "center"}}>
+                                                        {games[index].platforms.map((platform, index) => {
+                                                            if (platform === 'linux') {
+                                                                return <FaLinux key={index}/>
+                                                            } else if (platform === 'windows') {
+                                                                return <FaWindows key={index}/>
+                                                            } else {
+                                                                return <FaApple key={index}/>
+                                                            }
+                                                        })
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                {games[index].steamspy.map(tag => {
+                                                    if (tag === games[index].steamspy[games[index].steamspy.length - 1])
+                                                        return tag
+                                                    else {
+                                                        return tag + ', '
+                                                    }
+
+                                                })
+                                                }
+                                            </div>
+                                        </Card>
+                                    </Link>
+                                </div>
                             );
                         }}
                     </Grid>

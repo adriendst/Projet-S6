@@ -18,9 +18,9 @@ export interface Filter {
 export interface Game {
     id: number,
     name: string,
-    release_date: Date,
-    developer: string[],
-    publisher: string[],
+    release_date: string,
+    developer: string,
+    publisher: string,
     platforms: string[],
     required_age: number,
     categories: string[],
@@ -167,7 +167,10 @@ export const Slice = createSlice({
         },
         changeDateByRange : (state : {filter : Filter}) => {
             state.filter.dateByRange = !state.filter.dateByRange
-        }
+        },
+        // loadGames: (state: {game: Game[]}) => {
+        //     state.game.push(...data);
+        // },
     },
 });
 
