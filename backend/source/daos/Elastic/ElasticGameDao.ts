@@ -72,8 +72,8 @@ const ElasticGameDao: GameDao = {
                         },
                     },
                 });
-                // resolve({ searchText: params.searchText, results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text) });
-                resolve(body);
+                resolve({ searchText: params.searchText, results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text) });
+                // resolve(body);
             } catch (error) {
                 console.log(error);
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
@@ -154,8 +154,8 @@ const ElasticGameDao: GameDao = {
                         size: PAGE_SIZE,
                     },
                 });
-                resolve(body.hits.hits.map((doc) => doc._source!.developer));
-                // resolve(body.hits.hits.map((hit) => hit._source));
+                // resolve(body.hits.hits.map((doc) => doc._source!.developer));
+                resolve(body.hits.hits.map((hit) => hit._source));
                 // resolve(body);
             } catch (error) {
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
