@@ -1,6 +1,5 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import StatusCode from '../config/statusCodes';
 import AuthDao from '../daos/AuthDao';
 import { ValidateJoi } from '../middleware/joi';
 import { IToken, ITokenData } from '../interfaces/jwt';

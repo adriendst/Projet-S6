@@ -4,7 +4,6 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import logging from './config/logging';
 import config, { MODES } from './config/config';
-import StatusCode from './config/statusCodes';
 import swaggerUI from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swagger_options from './config/swagger';
@@ -12,9 +11,11 @@ import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { exit } from 'process';
+import { HTTP_STATUS, HTTP_STATUS_CODE } from './config/http_status';
 
 import authRoutes from './routes/auth';
 import gameRoutes from './routes/game';
+import developerRoutes from './routes/delveoper';
 
 const NAMESPACE = 'Server';
 const isProdMode = config.mode === MODES.PRODUCTION;
@@ -38,11 +39,11 @@ if (isProdMode) {
 
     app.use((req, res, next) => {
         if (!req.headers?.['user-agent']) {
-            res.status(StatusCode.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
+            res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
             return;
         }
         if (!req.headers['user-agent'].startsWith('Mozilla')) {
-            res.status(StatusCode.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
+            res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
             return;
         }
         next();
@@ -74,17 +75,18 @@ app.use((req, res, next) => {
 /** Routes go here */
 app.use(`/${config.server.api_version}/auth`, authRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
+app.use(`/${config.server.api_version}/developer`, developerRoutes);
 
 /** Error handling */
 app.use((_req, res, _next) => {
-    res.status(StatusCode.NotFound).json({ error: 'Not Found' });
+    res.status(HTTP_STATUS_CODE.NotFound).json({ error: HTTP_STATUS.NotFound.message });
 });
 
 app.disable('x-powered-by');
 
 const httpServer = http.createServer(app);
 httpServer.listen(config.server.http_port, () =>
-    logging.info(NAMESPACE, `Server is running on http://${config.server.hostname}${isProdMode ? '' : ':' + config.server.http_port} in ${isProdMode ? 'prodcution' : 'development'}-mode`)
+    logging.info(NAMESPACE, `Server is running on http://${config.server.hostname}${isProdMode ? '' : ':' + config.server.http_port} in ${isProdMode ? 'prodcution' : 'development'}-mode`),
 );
 
 if (isProdMode) {
@@ -92,9 +94,9 @@ if (isProdMode) {
         const httpsServer = https.createServer(
             {
                 key: fs.readFileSync(config.server.private_key, 'utf8'),
-                cert: fs.readFileSync(config.server.certificate, 'utf8')
+                cert: fs.readFileSync(config.server.certificate, 'utf8'),
             },
-            app
+            app,
         );
         httpsServer.listen(config.server.https_port, () => logging.info(NAMESPACE, `Server is running on https://${config.server.hostname}`));
     } catch (e: any) {
