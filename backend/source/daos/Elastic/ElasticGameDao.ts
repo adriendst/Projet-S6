@@ -72,8 +72,8 @@ const ElasticGameDao: GameDao = {
                         },
                     },
                 });
-                resolve({ searchText: params.searchText, results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text) });
-                // resolve(body);
+                // resolve({ searchText: params.searchText, results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text) });
+                resolve(body);
             } catch (error) {
                 console.log(error);
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
