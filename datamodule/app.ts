@@ -2,47 +2,49 @@ import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
 import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import csv from 'csv-parser';
-import { ANALYZER_SETTINGS } from './schemas/settings';
-import { GAME_PROPERTIES } from './schemas/games';
-import { DESCRIPTION_PROPERTIES } from './schemas/description';
-import { SUPPORT_PROPERTIES } from './schemas/support';
-import { MEDIA_PROPERTIES } from './schemas/media';
-import { REQUIREMENTS_PROPERTIES } from './schemas/requirements';
 import { transformer } from './utils/transformer';
+import { GAME_MAPPINGS, GAME_SETTINGS } from './schemas/games';
+import { DESCRIPTION_MAPPINGS } from './schemas/description';
+import { MEDIA_MAPPINGS } from './schemas/media';
+import { REQUIREMENTS_MAPPINGS } from './schemas/requirements';
+import { SUPPORT_MAPPINGS } from './schemas/support';
+import { TypeMapping } from '@elastic/elasticsearch/api/types';
 
 interface IIndex {
     name: string;
     file: string;
-    properties: any;
+    mappings: TypeMapping;
+    settings?: Record<string, any>;
 }
 
-const indices = [
+const indices: Array<IIndex> = [
     {
         name: 'games',
         file: 'steam.csv',
-        properties: GAME_PROPERTIES,
+        mappings: GAME_MAPPINGS,
+        // settings: GAME_SETTINGS,
     },
-    {
-        name: 'description',
-        file: 'steam_description_data.csv',
-        properties: DESCRIPTION_PROPERTIES,
-    },
-    {
-        name: 'media',
-        file: 'steam_media_data.csv',
-        properties: MEDIA_PROPERTIES,
-    },
-    {
-        name: 'requirements',
-        file: 'steam_requirements_data.csv',
-        properties: REQUIREMENTS_PROPERTIES,
-    },
-    {
-        name: 'support',
-        file: 'steam_support_info.csv',
-        properties: SUPPORT_PROPERTIES,
-    },
-] as Array<IIndex>;
+    // {
+    //     name: 'description',
+    //     file: 'steam_description_data.csv',
+    //     mappings: DESCRIPTION_MAPPINGS,
+    // },
+    // {
+    //     name: 'media',
+    //     file: 'steam_media_data.csv',
+    //     mappings: MEDIA_MAPPINGS,
+    // },
+    // {
+    //     name: 'requirements',
+    //     file: 'steam_requirements_data.csv',
+    //     mappings: REQUIREMENTS_MAPPINGS,
+    // },
+    // {
+    //     name: 'support',
+    //     file: 'steam_support_info.csv',
+    //     mappings: SUPPORT_MAPPINGS,
+    // },
+];
 
 const elasticUrl = process.env.ELASTIC_URL || 'http://localhost:9200';
 // @ts-expect-error @elastic/elasticsearch
@@ -59,11 +61,8 @@ async function prepare(indexData: IIndex, deleteIfExists: boolean): Promise<bool
     await esclient.indices.create({
         index: indexData.name,
         body: {
-            mappings: {
-                dynamic: 'strict',
-                properties: indexData.properties,
-            },
-            //settings: ANALYZER_SETTINGS
+            mappings: indexData.mappings,
+            settings: indexData.settings,
         },
     });
     console.log(`Created index ${indexData.name}`);
@@ -95,10 +94,11 @@ async function run() {
     console.log('Starting...');
     for (let indexData of indices) {
         try {
-            if (await prepare(indexData, false)) await index(indexData);
+            if (await prepare(indexData, true)) await index(indexData);
         } catch (err) {
             console.error(`An error occurred while with the index "${indexData.name}":`);
             console.error(err);
+            process.exit(1);
         }
     }
     console.log('Completed!');

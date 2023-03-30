@@ -14,6 +14,7 @@
     "license": "MIT",
     "dependencies": {
         "@elastic/elasticsearch": "7.13",
+        "@types/elasticsearch": "^5.0.40",
         "body-parser": "^1.20.2",
         "csv": "^6.2.8",
         "csv-parser": "^3.0.0",

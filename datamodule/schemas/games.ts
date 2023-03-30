@@ -1,84 +1,149 @@
-export const GAME_PROPERTIES = {
-    appid: {
-        type: 'keyword',
+import { TypeMapping } from '@elastic/elasticsearch/api/types';
+
+export const GAME_MAPPINGS: TypeMapping = {
+    dynamic: 'strict',
+    properties: {
+        appid: {
+            type: 'keyword',
+        },
+        name: {
+            type: 'text',
+            fields: {
+                autocomplete: {
+                    type: 'search_as_you_type',
+                },
+                fuzzy: {
+                    type: 'text',
+                    analyzer: 'standard',
+                },
+                sort: {
+                    type: 'keyword',
+                },
+            },
+        },
+        release_date: {
+            type: 'date',
+        },
+        english: {
+            type: 'boolean',
+            index: false,
+        },
+        developer: {
+            type: 'keyword',
+            fields: {
+                autocomplete: {
+                    type: 'search_as_you_type',
+                },
+                completion: {
+                    type: 'completion',
+                },
+            },
+        },
+        publisher: {
+            type: 'keyword',
+            fields: {
+                autocomplete: {
+                    type: 'search_as_you_type',
+                },
+            },
+        },
+        platforms: {
+            type: 'keyword',
+        },
+        required_age: {
+            type: 'integer',
+        },
+        categories: {
+            type: 'text',
+            fields: {
+                keyword: {
+                    type: 'keyword',
+                    ignore_above: 256,
+                },
+            },
+        },
+        genres: {
+            type: 'text',
+            fields: {
+                keyword: {
+                    type: 'keyword',
+                    ignore_above: 256,
+                },
+            },
+        },
+        steamspy_tags: {
+            type: 'text',
+            fields: {
+                keyword: {
+                    type: 'keyword',
+                    ignore_above: 256,
+                },
+            },
+        },
+        achievements: {
+            type: 'long',
+            index: false,
+        },
+        positive_ratings: {
+            type: 'long',
+            index: false,
+        },
+        negative_ratings: {
+            type: 'long',
+            index: false,
+        },
+        average_playtime: {
+            type: 'long',
+            index: false,
+        },
+        median_playtime: {
+            type: 'long',
+            index: false,
+        },
+        owners: {
+            type: 'text',
+            index: false,
+        },
+        price: {
+            type: 'float',
+        },
     },
-    name: {
-        type: 'text',
-        //analyzer: 'ngram_analyzer',
-        fielddata: true,
+};
+
+export const GAME_SETTINGS: Record<string, any> = {
+    analysis: {
+        filter: {
+            autocomplete_filter: {
+                type: 'edge_ngram',
+                min_gram: 1,
+                max_gram: 10,
+            },
+        },
+        analyzer: {
+            autocomplete: {
+                type: 'custom',
+                tokenizer: 'standard',
+                filter: ['lowercase', 'autocomplete_filter'],
+            },
+        },
     },
-    release_date: {
-        type: 'date',
-    },
-    english: {
-        type: 'integer',
-    },
-    developer: {
-        type: 'text',
-    },
-    publisher: {
-        type: 'text',
-    },
-    platforms: {
-        type: 'keyword',
-        // type: 'text',
-        // fields: {
-        //     keyword: {
-        //         type: 'keyword',
-        //         ignore_above: 256
-        //     }
-        // }
-    },
-    required_age: {
-        type: 'integer',
-    },
-    categories: {
-        type: 'keyword',
-        // type: 'text',
-        // fields: {
-        //     keyword: {
-        //         type: 'keyword',
-        //         ignore_above: 256
-        //     }
-        // }
-    },
-    genres: {
-        type: 'keyword',
-        // type: 'text',
-        // fields: {
-        //     keyword: {
-        //         type: 'keyword'
-        //     }
-        // }
-    },
-    steamspy_tags: {
-        type: 'keyword',
-        // type: 'text',
-        // fields: {
-        //     keyword: {
-        //         type: 'keyword',
-        //     },
-        // },
-    },
-    achievements: {
-        type: 'long',
-    },
-    positive_ratings: {
-        type: 'long',
-    },
-    negative_ratings: {
-        type: 'long',
-    },
-    average_playtime: {
-        type: 'long',
-    },
-    median_playtime: {
-        type: 'long',
-    },
-    owners: {
-        type: 'text',
-    },
-    price: {
-        type: 'float',
+};
+
+export const OTHER_SETTINGS = {
+    analysis: {
+        analyzer: {
+            autocomplete: {
+                tokenizer: 'autocomplete',
+                filter: ['lowercase'],
+            },
+        },
+        tokenizer: {
+            autocomplete: {
+                type: 'edge_ngram',
+                min_gram: 1,
+                max_gram: 20,
+                token_chars: ['letter', 'digit'],
+            },
+        },
     },
 };
