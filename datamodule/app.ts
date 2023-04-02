@@ -96,7 +96,7 @@ async function run() {
         try {
             if (await prepare(indexData, true)) await index(indexData);
         } catch (err) {
-            console.error(`An error occurred while with the index "${indexData.name}":`);
+            console.error(`An error occurred with the index "${indexData.name}":`);
             console.error(err);
             process.exit(1);
         }
