@@ -1,5 +1,5 @@
 export interface CategoryDao {
-    getCategories(): Promise<Array<string>>;
+    getAll(): Promise<Array<string>>;
 }
 
 export default CategoryDao;

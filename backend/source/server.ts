@@ -16,6 +16,8 @@ import { HTTP_STATUS, HTTP_STATUS_CODE } from './config/http_status';
 import authRoutes from './routes/auth';
 import gameRoutes from './routes/game';
 import developerRoutes from './routes/delveoper';
+import categoryRoutes from './routes/category';
+import genreRoutes from './routes/genre';
 
 const NAMESPACE = 'Server';
 const isProdMode = config.mode === MODES.PRODUCTION;
@@ -76,6 +78,8 @@ app.use((req, res, next) => {
 app.use(`/${config.server.api_version}/auth`, authRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
 app.use(`/${config.server.api_version}/developer`, developerRoutes);
+app.use(`/${config.server.api_version}/category`, categoryRoutes);
+app.use(`/${config.server.api_version}/genre`, genreRoutes);
 
 /** Error handling */
 app.use((_req, res, _next) => {

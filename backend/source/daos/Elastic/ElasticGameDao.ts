@@ -51,37 +51,6 @@ const ElasticGameDao: GameDao = {
         });
     },
 
-    completeDeveloper(params: CompletionParameters): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                logging.info(NAMESPACE, 'completeDeveloper', params);
-
-                const resultSize = params.results ?? DEFAULTS.autocompletion_results;
-
-                const { body } = await ElasticConnector.instance.client.search<Game>({
-                    index: indexName,
-                    body: {
-                        suggest: {
-                            developer_suggest: {
-                                prefix: params.searchText,
-                                completion: {
-                                    field: 'developer.completion',
-                                    size: resultSize,
-                                    skip_duplicates: true,
-                                },
-                            },
-                        },
-                    },
-                });
-                resolve({ searchText: params.searchText, results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text) });
-                // resolve(body);
-            } catch (error) {
-                console.log(error);
-                reject({ code: 500, message: 'An unexpected error occured', cause: error });
-            }
-        });
-    },
-
     getGameById(params: { id: string }): Promise<any> {
         return new Promise(async (resolve, reject) => {
             try {
