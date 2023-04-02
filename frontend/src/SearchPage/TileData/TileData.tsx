@@ -11,7 +11,10 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import {FixedSizeGrid as Grid} from "react-window";
 
 const TileData = () => {
-
+    fetch("http://localhost:9090/v1/game/10")
+        .then(response => response.json())
+        .then(response => alert(JSON.stringify(response)))
+        .catch(error => alert("Erreur : " + error));
 
     const games = useSelector((state: State) => state.steam.game);
 

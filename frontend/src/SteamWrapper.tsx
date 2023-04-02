@@ -7,7 +7,6 @@ import Login from "./Login/Login";
 import Register from "./Register/Register";
 
 const SteamWrapper = () => {
-
     return (
         <Provider store={store}>
             <BrowserRouter>
