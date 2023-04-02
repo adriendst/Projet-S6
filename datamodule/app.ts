@@ -24,26 +24,26 @@ const indices: Array<IIndex> = [
         mappings: GAME_MAPPINGS,
         // settings: GAME_SETTINGS,
     },
-    // {
-    //     name: 'description',
-    //     file: 'steam_description_data.csv',
-    //     mappings: DESCRIPTION_MAPPINGS,
-    // },
-    // {
-    //     name: 'media',
-    //     file: 'steam_media_data.csv',
-    //     mappings: MEDIA_MAPPINGS,
-    // },
-    // {
-    //     name: 'requirements',
-    //     file: 'steam_requirements_data.csv',
-    //     mappings: REQUIREMENTS_MAPPINGS,
-    // },
-    // {
-    //     name: 'support',
-    //     file: 'steam_support_info.csv',
-    //     mappings: SUPPORT_MAPPINGS,
-    // },
+    {
+        name: 'description',
+        file: 'steam_description_data.csv',
+        mappings: DESCRIPTION_MAPPINGS,
+    },
+    {
+        name: 'media',
+        file: 'steam_media_data.csv',
+        mappings: MEDIA_MAPPINGS,
+    },
+    {
+        name: 'requirements',
+        file: 'steam_requirements_data.csv',
+        mappings: REQUIREMENTS_MAPPINGS,
+    },
+    {
+        name: 'support',
+        file: 'steam_support_info.csv',
+        mappings: SUPPORT_MAPPINGS,
+    },
 ];
 
 const elasticUrl = process.env.ELASTIC_URL || 'http://localhost:9200';

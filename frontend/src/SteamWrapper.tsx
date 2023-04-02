@@ -5,6 +5,7 @@ import SearchPage from "./SearchPage";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Login from "./Login/Login";
 import Register from "./Register/Register";
+import DetailPage from './DetailPage';
 
 const SteamWrapper = () => {
     return (
@@ -14,7 +15,7 @@ const SteamWrapper = () => {
                     <Route path="/" element={<SearchPage/>}/>
                     <Route path="/login" element={<Login/>}/>
                     <Route path="/register" element={<Register/>}/>
-                    <Route path="/game/:gameid" element={<div></div>}/>
+                    <Route path="/game/:gameid" element={<DetailPage/>}/>
                 </Routes>
             </BrowserRouter>
         </Provider>
