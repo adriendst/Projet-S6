@@ -1,4 +1,5 @@
 import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
+import { RequestAbortedError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import DEFAULTS from '../../config/defaults';
 import { HTTP_STATUS, HTTP_STATUS_CODE } from '../../config/http_status';
 import logging from '../../config/logging';
@@ -85,13 +86,29 @@ const ElasticGameDao: GameDao = {
         return new Promise(async (resolve, reject) => {
             try {
                 logging.info(NAMESPACE, 'getGameById', params);
-                const { body } = await ElasticConnector.instance.client.get({
-                    index: indexName,
-                    id: params.id,
-                });
-                resolve(body?._source);
+                const indicies = [indexName, 'description', 'media', 'support', 'requirements'];
+                const results = await Promise.all(
+                    indicies.map((index) =>
+                        ElasticConnector.instance.client.get({
+                            index: index,
+                            id: params.id,
+                        }),
+                    ),
+                );
+                let body = {};
+                for (const result of results) {
+                    if (result.body._source) {
+                        body = { ...body, ...result.body._source };
+                    }
+                }
+                resolve(body);
             } catch (error) {
-                reject({ code: 404, message: 'Game not found', cause: error });
+                if (error instanceof ResponseError) {
+                    console.log(NAMESPACE, 'RequestAbortedError', error);
+                    reject({ code: error.statusCode, message: error.message, cause: error });
+                } else {
+                    reject({ code: 500, message: 'Internal server error', cause: error });
+                }
             }
         });
     },
