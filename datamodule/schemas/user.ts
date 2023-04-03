@@ -11,18 +11,18 @@ export const USER_MAPPINGS: TypeMapping = {
         },
         password_hash: {
             type: 'text',
-            enabled: false,
+            index: false,
         },
         games: {
             type: 'keyword',
         },
         last_login: {
             type: 'date',
-            enabled: false,
+            index: false,
         },
         created_at: {
             type: 'date',
-            enabled: false,
+            index: false,
         },
     },
 };
