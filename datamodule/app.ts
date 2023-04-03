@@ -99,7 +99,7 @@ async function run() {
     console.log('Starting...');
     for (let indexData of indices) {
         try {
-            if ((await prepare(indexData, false)) && indexData.file !== undefined) await index(indexData);
+            if ((await prepare(indexData, true)) && indexData.file !== undefined) await index(indexData);
         } catch (err) {
             console.error(`An error occurred with the index "${indexData.name}":`);
             console.error(err);

@@ -5,6 +5,8 @@ import logging from '../config/logging';
 import Daos from '../daos/Daos';
 import GameDao from '../daos/GameDao';
 import { FilterParameters } from '../interfaces/filter';
+import { ValidateAdvancedJoi, ValidateJoi, ValidateQueryJoi } from '../middleware/joi';
+import CompletionSchemas from '../joi/completion';
 
 const NAMESPACE = 'GAME-ROUTE';
 
@@ -48,13 +50,13 @@ router.get('/:id', (req, res) => {
 
 /**
  * @swagger
- * /v1/game/complete/{search}:
+ * /v1/game/complete/{searchText}:
  *   get:
  *     summary: Get autocompletions for a string
  *     tags: [Game]
  *     parameters:
  *       - in: path
- *         name: search
+ *         name: searchText
  *         schema:
  *           type: string
  *         required: true
@@ -66,16 +68,14 @@ router.get('/:id', (req, res) => {
  *       422:
  *         description: The entered parameters do not correspond to the schema
  */
-router.get('/complete/:search', (req, res) => {
-    const searchText = req.params.search ?? '';
-    if (searchText.trim().length === 0) {
-        res.status(HTTP_STATUS_CODE.UnprocessableEntity).json(HTTP_STATUS.UnprocessableEntity);
-    } else {
-        gameDao
-            .completeName({ searchText })
-            .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))
-            .catch((err) => res.status(err.code).json(err));
-    }
+router.get('/complete/:searchText', ValidateJoi(CompletionSchemas.searchText), ValidateQueryJoi(CompletionSchemas.results), (req, res) => {
+    const searchText = req.params.searchText ?? '';
+    const query = req.query as { result?: number };
+
+    gameDao
+        .completeName({ searchText, ...query })
+        .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))
+        .catch((err) => res.status(err.code).json(err));
 });
 
 /**
@@ -86,32 +86,17 @@ router.get('/complete/:search', (req, res) => {
  *     tags: [Game]
  *     parameters:
  *       - $ref: '#/components/parameters/PageParameter'
+ *       - $ref: '#/components/parameters/NameParameter'
  *       - $ref: '#/components/parameters/DeveloperParameter'
  *       - $ref: '#/components/parameters/PublisherParameter'
  *       - $ref: '#/components/parameters/PlatformParameter'
- *       - in: query
- *         name: and_platforms
- *         required: false
- *         schema:
- *           type: boolean
- *         default: true
- *         description: The games of the publishers to show
+ *       - $ref: '#/components/parameters/PlatformOperatorParameter'
  *       - $ref: '#/components/parameters/CategoryParameter'
  *       - $ref: '#/components/parameters/GenreParameter'
- *       - in: query
- *         name: required_age
- *         required: false
- *         schema:
- *           type: integer
- *         example: 18
- *         description: The games of the publishers to show
- *       - in: query
- *         name: order_by
- *         required: false
- *         schema:
- *           type: string
- *         example: name
- *         description: The field to order the games by
+ *       - $ref: '#/components/parameters/RequiredAgeParamter'
+ *       - $ref: '#/components/parameters/StartDateParameter'
+ *       - $ref: '#/components/parameters/EndDateParameter'
+ *       - $ref: '#/components/parameters/OrderByParamter'
  *       - $ref: '#/components/parameters/OrderTypeParameter'
  *     responses:
  *       200:

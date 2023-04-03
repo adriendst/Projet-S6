@@ -12,11 +12,14 @@ export const GAME_MAPPINGS: TypeMapping = {
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
+                completion: {
+                    type: 'completion',
+                },
                 fuzzy: {
                     type: 'text',
                     analyzer: 'standard',
                 },
-                sort: {
+                keyword: {
                     type: 'keyword',
                 },
             },

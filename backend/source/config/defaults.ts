@@ -8,6 +8,7 @@ export const ROUTES_CONFIG = {
 
 const DEFAULTS = {
     autocompletion_results: ROUTES_CONFIG.autocompletion.default,
+    sorting: 'asc',
 };
 
 export default DEFAULTS;
