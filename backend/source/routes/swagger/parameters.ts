@@ -15,7 +15,7 @@
  *     SearchTextParameter:
  *       in: query
  *       name: searchText
- *       required: true
+ *       required: false
  *       schema:
  *         type: string
  *       example: "Val"

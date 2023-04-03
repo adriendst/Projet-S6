@@ -3,7 +3,7 @@ import { Client } from '@elastic/elasticsearch';
 import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import csv from 'csv-parser';
 import { transformer } from './utils/transformer';
-import { GAME_MAPPINGS, GAME_SETTINGS } from './schemas/games';
+import { GAME_MAPPINGS } from './schemas/games';
 import { DESCRIPTION_MAPPINGS } from './schemas/description';
 import { MEDIA_MAPPINGS } from './schemas/media';
 import { REQUIREMENTS_MAPPINGS } from './schemas/requirements';
@@ -23,7 +23,6 @@ const indices: Array<IIndex> = [
         name: 'games',
         file: 'steam.csv',
         mappings: GAME_MAPPINGS,
-        // settings: GAME_SETTINGS,
     },
     {
         name: 'description',

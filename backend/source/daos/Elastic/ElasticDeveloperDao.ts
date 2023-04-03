@@ -1,3 +1,4 @@
+import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
 import DEFAULTS from '../../config/defaults';
 import { HTTP_STATUS } from '../../config/http_status';
 import logging from '../../config/logging';
@@ -19,30 +20,71 @@ const ElasticDeveloperDao: DeveloperDao = {
 
                 const maxResultSize = params.results ?? DEFAULTS.autocompletion_results;
 
+                let query: QueryContainer | undefined = undefined;
+                let sort: Sort = [];
+                if (params.searchText !== undefined && params.searchText.length !== 0) {
+                    query = {
+                        bool: {
+                            should: [
+                                {
+                                    match: {
+                                        'developer.fuzzy': {
+                                            query: params.searchText,
+                                            fuzziness: 2,
+                                            prefix_length: 1,
+                                            boost: 2,
+                                        },
+                                    },
+                                },
+                                {
+                                    match_bool_prefix: {
+                                        'developer.autocomplete': {
+                                            query: params.searchText,
+                                            fuzziness: 2,
+                                            boost: 2,
+                                        },
+                                    },
+                                },
+                            ],
+                            minimum_should_match: 1,
+                        },
+                    };
+                } else {
+                    sort.push({
+                        developer: { order: 'desc' },
+                    });
+                }
+
                 const { body } = await ElasticConnector.instance.client.search<Game>({
                     index: indexName,
                     body: {
-                        suggest: {
-                            developer_suggest: {
-                                prefix: params.searchText,
-                                completion: {
-                                    field: 'developer.completion',
+                        query,
+                        size: 0,
+                        aggs: {
+                            unique_developers: {
+                                terms: {
+                                    field: 'developer',
                                     size: maxResultSize,
-                                    skip_duplicates: true,
                                 },
                             },
                         },
                     },
                 });
 
+                let developers = [];
+                if (body.aggregations !== undefined) {
+                    // @ts-ignore
+                    developers = body.aggregations.unique_developers.buckets;
+                }
+                const uniqueDevelopers = developers.map(({ key }: { key: string }) => key);
+
                 resolve({
                     searchText: params.searchText,
                     maxResults: maxResultSize,
-                    results: body.suggest?.developer_suggest[0].options.map((doc) => doc.text),
+                    results: uniqueDevelopers,
                 });
-                // resolve(body);
             } catch (error) {
-                console.log(error);
+                logging.error(NAMESPACE, 'completeName', error);
                 reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
             }
         });

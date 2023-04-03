@@ -177,9 +177,8 @@ const ElasticGameDao: GameDao = {
                 logging.info(NAMESPACE, 'filters', filters);
 
                 if (params.order_by !== undefined) {
-                    logging.info(NAMESPACE, 'filterGames', params);
                     const orderType = params.order_type ?? DEFAULTS.sorting;
-                    let orderBy = params.order_by ?? 'name.keyword';
+                    let orderBy = params.order_by ?? 'name';
                     if (orderBy === 'name') orderBy += '.keyword';
                     const sorter = {} as any;
                     sorter[orderBy] = { order: orderType };
