@@ -204,8 +204,8 @@ const ElasticGameDao: GameDao = {
                     index: indexName,
                     body: { query },
                 });
-                resolve({ results: body.hits.hits.map((doc) => doc._source!.release_date), count: countRes.body.count });
-                // resolve(body.hits.hits.map((hit) => hit._source));
+                // resolve({ results: body.hits.hits.map((doc) => doc._source!.release_date), count: countRes.body.count });
+                resolve(body.hits.hits.map((hit) => hit._source));
                 // resolve(body);
             } catch (error) {
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
