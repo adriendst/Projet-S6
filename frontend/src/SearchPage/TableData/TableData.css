@@ -27,13 +27,13 @@
 
 
 @media only screen and (max-width: 2500px) {
-    li > div > div:nth-child(1) {
+    li > div > div:nth-child(4) {
         width: 20%;
     }
 
     li > div > div:nth-child(2),
     li > div > div:nth-child(3),
-    li > div > div:nth-child(4),
+    li > div > div:nth-child(1),
     li > div > div:nth-child(5),
     li > div > div:nth-child(6),
     li > div > div:nth-child(7),
@@ -46,7 +46,8 @@
 
 @media only screen and (max-width: 1400px) {
     li > div > div:nth-child(2),
-    li > div > div:nth-child(6) {
+    li > div > div:nth-child(4)
+    {
         display: none;
     }
 
@@ -55,7 +56,7 @@
     }
 
     li > div > div:nth-child(3),
-    li > div > div:nth-child(4) {
+    li > div > div:nth-child(6) {
         width: 15%;
     }
 
@@ -74,7 +75,7 @@
         display: none;
     }
 
-    li > div > div:nth-child(4),
+    li > div > div:nth-child(6),
     li > div > div:nth-child(5) {
         width: 20%;
     }
@@ -86,7 +87,7 @@
 }
 
 @media only screen and (max-width: 700px) {
-    li > div > div:nth-child(4),
+    li > div > div:nth-child(6),
     li > div > div:nth-child(7) {
         display: none;
     }

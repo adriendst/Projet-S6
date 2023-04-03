@@ -12,6 +12,7 @@ const TableData = () => {
 
     const games = useSelector((state: State) => state.steam.game);
 
+
     return (
         <ul className={'table'}>
             <li className={'tableHeader'}>
@@ -32,22 +33,44 @@ const TableData = () => {
                     <List
                         innerElementType="ul"
                         itemCount={games.length}
-                        style={{overflowX:"hidden"}}
-                        itemSize={100}
+                        style={{overflowX: "hidden"}}
+                        itemSize={150}
                         height={Number(height)}
                         width={Number(width)}
                     >
                         {({index, style}) => {
                             return (
-                                <Link to={`/game/${games[index].id}`}>
+                                <Link to={`/game/${games[index].appid}`}>
                                     <li style={style}>
-                                        <div className={'rowData'} key={games[index].id}>
+                                        <div className={'rowData'} key={games[index].appid}>
                                             <div className={'element'}>{games[index].name}</div>
                                             <div className={'element'}>{games[index].developer}</div>
                                             <div className={'element'}>{games[index].publisher}</div>
-                                            <div className={'element'}>{games[index].categories}</div>
-                                            <div className={'element'}>{games[index].genres}</div>
-                                            <div className={'element'}>{games[index].steamspy}</div>
+                                            <div className={'element'}>{games[index].categories.map(tag => {
+                                                if (tag === games[index].categories[games[index].categories.length - 1])
+                                                    return tag
+                                                else {
+                                                    return tag + ' / '
+                                                }
+
+                                            })}
+                                            </div>
+                                            <div className={'element'}>{games[index].genres.map(tag => {
+                                                if (tag === games[index].genres[games[index].genres.length - 1])
+                                                    return tag
+                                                else {
+                                                    return tag + ' / '
+                                                }
+
+                                            })}</div>
+                                            <div className={'element'}>{games[index].steamspy_tags.map(tag => {
+                                                if (tag === games[index].steamspy_tags[games[index].steamspy_tags.length - 1])
+                                                    return tag
+                                                else {
+                                                    return tag + ' / '
+                                                }
+
+                                            })}</div>
                                             <div className={'element'}>{games[index].release_date.toString()}</div>
                                             <div className={'element'}>{games[index].required_age}</div>
                                             <div className={'element'}>{games[index].platforms}</div>

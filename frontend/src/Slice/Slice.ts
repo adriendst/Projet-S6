@@ -16,17 +16,24 @@ export interface Filter {
 }
 
 export interface Game {
-    id: number,
+    appid: number,
     name: string,
     release_date: string,
+    english : boolean,
     developer: string,
     publisher: string,
     platforms: string[],
     required_age: number,
     categories: string[],
     genres: string[],
-    steamspy: string[],
-    header_image : string,
+    steamspy_tags : string[],
+    achievements: number,
+    positive_ratings: number,
+    negative_ratings: number,
+    average_playtime: number,
+    median_playtime: number,
+    owners: string,
+    price: number
 }
 
 export interface Steam {
@@ -128,6 +135,8 @@ const test = () => {
     return coucou++
 }
 
+
+
 export const Slice = createSlice({
     name: 'steam',
     initialState: {
@@ -145,7 +154,7 @@ export const Slice = createSlice({
             steamspy: []
         },
         displayType : false,
-        game : data,
+        game : [],
         developers : getListeDeveloppeurs(data),
         publishers : getListePublishers(data),
         platforms : getListePlatforms(data),
@@ -168,13 +177,13 @@ export const Slice = createSlice({
         changeDateByRange : (state : {filter : Filter}) => {
             state.filter.dateByRange = !state.filter.dateByRange
         },
-        // loadGames: (state: {game: Game[]}) => {
-        //     state.game.push(...data);
-        // },
+        loadGames: (state: { game: Game[] }, action: { payload: Game[] }) => {
+            state.game = state.game.concat(action.payload);
+        },
     },
 });
 
 
-export const {changeDisplayType, updateFilters, changeDateByYear, changeDateByRange} = Slice.actions;
+export const {changeDisplayType, updateFilters, changeDateByYear, changeDateByRange, loadGames} = Slice.actions;
 
 export default Slice.reducer;
