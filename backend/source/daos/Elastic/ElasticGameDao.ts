@@ -102,15 +102,17 @@ const ElasticGameDao: GameDao = {
                 const indicies = [indexName, 'description', 'media', 'support', 'requirements'];
                 const results = await Promise.all(
                     indicies.map((index) =>
-                        ElasticConnector.instance.client.get({
-                            index: index,
-                            id: params.id,
-                        }),
+                        ElasticConnector.instance.client
+                            .get({
+                                index: index,
+                                id: params.id,
+                            })
+                            .catch(() => null),
                     ),
                 );
                 let body = {};
                 for (const result of results) {
-                    if (result.body._source) {
+                    if (result !== null && result.body._source) {
                         body = { ...body, ...result.body._source };
                     }
                 }
