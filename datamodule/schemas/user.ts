@@ -1,4 +1,6 @@
-export const USER_MAPPINGS = {
+import { TypeMapping } from '@elastic/elasticsearch/api/types';
+
+export const USER_MAPPINGS: TypeMapping = {
     dynamic: 'strict',
     properties: {
         userid: {
@@ -10,6 +12,9 @@ export const USER_MAPPINGS = {
         password_hash: {
             type: 'text',
             enabled: false,
+        },
+        games: {
+            type: 'keyword',
         },
         last_login: {
             type: 'date',

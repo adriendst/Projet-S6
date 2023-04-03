@@ -9,10 +9,11 @@ import { MEDIA_MAPPINGS } from './schemas/media';
 import { REQUIREMENTS_MAPPINGS } from './schemas/requirements';
 import { SUPPORT_MAPPINGS } from './schemas/support';
 import { TypeMapping } from '@elastic/elasticsearch/api/types';
+import { USER_MAPPINGS } from './schemas/user';
 
 interface IIndex {
     name: string;
-    file: string;
+    file?: string;
     mappings: TypeMapping;
     settings?: Record<string, any>;
 }
@@ -43,6 +44,10 @@ const indices: Array<IIndex> = [
         name: 'support',
         file: 'steam_support_info.csv',
         mappings: SUPPORT_MAPPINGS,
+    },
+    {
+        name: 'user',
+        mappings: USER_MAPPINGS,
     },
 ];
 
@@ -94,7 +99,7 @@ async function run() {
     console.log('Starting...');
     for (let indexData of indices) {
         try {
-            if (await prepare(indexData, true)) await index(indexData);
+            if ((await prepare(indexData, false)) && indexData.file !== undefined) await index(indexData);
         } catch (err) {
             console.error(`An error occurred with the index "${indexData.name}":`);
             console.error(err);
