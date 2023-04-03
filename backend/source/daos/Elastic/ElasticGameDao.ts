@@ -175,7 +175,9 @@ const ElasticGameDao: GameDao = {
                     if (params.start_date.length === 4 && params.end_date === undefined) {
                         filters.push({ range: { release_date: { gte: `${params.start_date}-01-01`, lte: `${params.start_date}-12-31` } } });
                     } else {
-                        filters.push({ range: { release_date: { gte: params.start_date, lte: params.end_date ?? params.start_date } } });
+                        const startDate = params.start_date.length === 4 ? `${params.start_date}-01-01` : params.start_date;
+                        const endDate = params.end_date === undefined ? params.start_date : params.end_date.length === 4 ? `${params.end_date}-12-31` : params.end_date;
+                        filters.push({ range: { release_date: { gte: startDate, lte: endDate } } });
                     }
                 }
                 logging.info(NAMESPACE, 'filters', filters);
@@ -213,6 +215,7 @@ const ElasticGameDao: GameDao = {
                     page: page,
                     total: countRes.body.count,
                     results: body.hits.hits.map((doc) => doc._source),
+                    filters,
                 });
                 // resolve(body.hits.hits.map((hit) => hit._source));
                 // resolve(body);
