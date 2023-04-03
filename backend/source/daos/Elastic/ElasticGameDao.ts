@@ -172,7 +172,11 @@ const ElasticGameDao: GameDao = {
                     filters.push({ range: { required_age: { gte: 0, lte: params.required_age } } });
                 }
                 if (params.start_date !== undefined) {
-                    filters.push({ range: { release_date: { gte: params.start_date, lte: params.end_date ?? params.start_date } } });
+                    if (params.start_date.length === 4 && params.end_date === undefined) {
+                        filters.push({ range: { release_date: { gte: `${params.start_date}-01-01`, lte: `${params.start_date}-12-31` } } });
+                    } else {
+                        filters.push({ range: { release_date: { gte: params.start_date, lte: params.end_date ?? params.start_date } } });
+                    }
                 }
                 logging.info(NAMESPACE, 'filters', filters);
 
@@ -205,8 +209,12 @@ const ElasticGameDao: GameDao = {
                     index: indexName,
                     body: { query },
                 });
-                // resolve({ results: body.hits.hits.map((doc) => doc._source!.release_date), count: countRes.body.count });
-                resolve(body.hits.hits.map((hit) => hit._source));
+                resolve({
+                    page: page,
+                    total: countRes.body.count,
+                    results: body.hits.hits.map((doc) => doc._source),
+                });
+                // resolve(body.hits.hits.map((hit) => hit._source));
                 // resolve(body);
             } catch (error) {
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });

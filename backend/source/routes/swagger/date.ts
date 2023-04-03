@@ -8,7 +8,7 @@
  *       required: false
  *       schema:
  *          type: date
- *          example: 2019-05-17
+ *          example: 1999-01-01
  *       description: The start of the timespan
  *
  *     EndDateParameter:
@@ -17,6 +17,6 @@
  *       required: false
  *       schema:
  *          type: date
- *          example: 2019-05-17
+ *          example: 2022-12-31
  *       description: The end of the timespan, if not provided, the start will also be the end
  */
