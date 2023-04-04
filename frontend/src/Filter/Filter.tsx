@@ -16,28 +16,17 @@ const Filter = () => {
 
     const {Panel} = Collapse;
     const {RangePicker} = DatePicker;
-    const [searchNameValue, setNameSearchValue] = useState<string>("");
+    const [searchNameValue, setNameSearchValue] = useState<string | undefined>(undefined);
     const [byYear, setByYear] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByYear));
     const [byRange, setByRange] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByRange));
     const game = useSelector((state: State) => state.steam.game);
     const filters = useSelector((state: State) => state.steam.filter);
-
-    const options = {
-        includeScore: true,
-        keys: ['name'],
-    };
-
-    const fuse = new Fuse(game.map((game) => {
-        return game.name
-    }), options)
 
     const [filteredOptions, setFilteredOptions] = useState<{ value: string; label: string; }[]>([]);
 
     const onChangeName = (value: string) => {
         console.log(`selected ${value}`);
         setNameSearchValue(value);
-        const result = fuse.search(value);
-        const filteredOptions = result.map((r) => ({value: r.item, label: r.item}));
         setFilteredOptions(filteredOptions);
         const newFilters = {...filters, name: value};
         dispatch(updateFilters(newFilters));
@@ -75,10 +64,12 @@ const Filter = () => {
         setByRange(!byRange)
     }
 
+
     return (
         <div className={'filterDiv'}>
             <div className={'name'}>
                 <Select
+                    allowClear
                     showSearch
                     defaultValue={filters.name !== "" ? filters.name : null}
                     className={'nameInputSize'}
@@ -86,7 +77,7 @@ const Filter = () => {
                     onChange={onChangeName}
                     onSearch={onChangeName}
                     filterOption={false}
-                    options={searchNameValue.length > 0
+                    options={searchNameValue === undefined
                         ? filteredOptions.map((game) => ({value: game.value, label: game.label}))
                         : game.map((game) => ({value: game.name, label: game.name}))
                     }
@@ -96,8 +87,8 @@ const Filter = () => {
                 <Panel header="Show advanced filters" key={'Filters'}>
                     <div className={'filters'}>
                         <div>
-                            <MultipleSelectWithFuzzySearch filters={filters} selectParam={'Developers'}/>
-                            <MultipleSelectWithFuzzySearch filters={filters} selectParam={'Publishers'}/>
+                            <MultipleSelect filters={filters} selectParam={'Developers'}/>
+                            <MultipleSelect filters={filters} selectParam={'Publishers'}/>
                         </div>
                         <div>
                             <MultipleSelect filters={filters} selectParam={'Platforms'}/>

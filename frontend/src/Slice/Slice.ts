@@ -2,9 +2,9 @@ import {createSlice} from '@reduxjs/toolkit'
 import data from '../data.json'
 
 export interface Filter {
-    name: string,
-    dateByYear : boolean,
-    dateByRange : boolean
+    name: string | undefined,
+    dateByYear: boolean,
+    dateByRange: boolean
     release_date: Date[],
     developers: string[],
     publishers: string[],
@@ -19,14 +19,14 @@ export interface Game {
     appid: number,
     name: string,
     release_date: string,
-    english : boolean,
+    english: boolean,
     developer: string,
     publisher: string,
     platforms: string[],
     required_age: number,
     categories: string[],
     genres: string[],
-    steamspy_tags : string[],
+    steamspy_tags: string[],
     achievements: number,
     positive_ratings: number,
     negative_ratings: number,
@@ -38,18 +38,20 @@ export interface Game {
 
 export interface Steam {
     filter: Filter
-    displayType : boolean
-    game : Game[],
-    developers : [],
-    publishers : [],
-    platforms : [],
-    categories : [],
+    displayType: boolean
+    game: Game[],
+    developers: [],
+    publishers: [],
+    platforms: [],
+    categories: [],
     genres: [],
-    steamspy : []
+    steamspy: [],
+    searchPage: number,
+    url : string
 }
 
 
-function getListeDeveloppeurs(data : Array<any>) {
+function getListeDeveloppeurs(data: Array<any>) {
     let listeDeveloppeurs: Array<string> = [];
 
     for (let i = 0; i < data.length; i++) {
@@ -62,7 +64,7 @@ function getListeDeveloppeurs(data : Array<any>) {
     return listeDeveloppeurs;
 }
 
-function getListePublishers(data : Array<any>) {
+function getListePublishers(data: Array<any>) {
     let publishersList: Array<string> = [];
 
     for (let i = 0; i < data.length; i++) {
@@ -75,12 +77,12 @@ function getListePublishers(data : Array<any>) {
     return publishersList;
 }
 
-function getListePlatforms(data : Array<any>) {
+function getListePlatforms(data: Array<any>) {
     let platformsList: Array<string> = [];
-    for(let i = 0; i<data.length; i++){
+    for (let i = 0; i < data.length; i++) {
         const platforms = data[i].platforms
-        for(let j = 0; j<platforms.length; j++){
-            if(!platformsList.includes(platforms[j])){
+        for (let j = 0; j < platforms.length; j++) {
+            if (!platformsList.includes(platforms[j])) {
                 platformsList.push(platforms[j])
             }
         }
@@ -89,12 +91,12 @@ function getListePlatforms(data : Array<any>) {
     return platformsList;
 }
 
-function getListeCategories(data : Array<any>) {
+function getListeCategories(data: Array<any>) {
     let platformsList: Array<string> = [];
-    for(let i = 0; i<data.length; i++){
+    for (let i = 0; i < data.length; i++) {
         const platforms = data[i].categories
-        for(let j = 0; j<platforms.length; j++){
-            if(!platformsList.includes(platforms[j])){
+        for (let j = 0; j < platforms.length; j++) {
+            if (!platformsList.includes(platforms[j])) {
                 platformsList.push(platforms[j])
             }
         }
@@ -103,26 +105,25 @@ function getListeCategories(data : Array<any>) {
     return platformsList;
 }
 
-function getListGenres(data : Array<any>) {
-    let platformsList: Array<string> = [];
-    for(let i = 0; i<data.length; i++){
-        const platforms = data[i].genres
-        for(let j = 0; j<platforms.length; j++){
-            if(!platformsList.includes(platforms[j])){
-                platformsList.push(platforms[j])
-            }
-        }
-    }
+function getListGenres() {
+    let list: Array<string> = ['coucou'];
+    fetch("http://localhost:9090/v1/genre/all")
+        .then(response => response.json())
+        .then(response => {
+            list = list.concat(response);
+            console.log(list);
+            return list;
+        })
+        .catch(error => alert("Erreur : " + error));
 
-    return platformsList;
 }
 
-function getListSteamSpy(data : Array<any>) {
+function getListSteamSpy(data: Array<any>) {
     let platformsList: Array<string> = [];
-    for(let i = 0; i<data.length; i++){
+    for (let i = 0; i < data.length; i++) {
         const platforms = data[i].steamspy
-        for(let j = 0; j<platforms.length; j++){
-            if(!platformsList.includes(platforms[j])){
+        for (let j = 0; j < platforms.length; j++) {
+            if (!platformsList.includes(platforms[j])) {
                 platformsList.push(platforms[j])
             }
         }
@@ -130,22 +131,22 @@ function getListSteamSpy(data : Array<any>) {
 
     return platformsList;
 }
+
 let coucou = 0;
 const test = () => {
     return coucou++
 }
 
 
-
 export const Slice = createSlice({
     name: 'steam',
     initialState: {
-        filter : {
-            name: '',
-            dateByYear : false,
-            dateByRange : false,
+        filter: {
+            name: undefined,
+            dateByYear: false,
+            dateByRange: false,
             release_date: [],
-            developers: ['test', 'coucou'],
+            developers: [],
             publishers: [],
             platforms: [],
             required_age: undefined,
@@ -153,37 +154,59 @@ export const Slice = createSlice({
             genres: [],
             steamspy: []
         },
-        displayType : false,
-        game : [],
-        developers : getListeDeveloppeurs(data),
-        publishers : getListePublishers(data),
-        platforms : getListePlatforms(data),
-        categories : getListeCategories(data),
-        genres : getListGenres(data),
-        steamspy : getListSteamSpy(data),
-        test : test()
+        displayType: false,
+        game: [],
+        developers: getListeDeveloppeurs(data),
+        publishers: getListePublishers(data),
+        platforms: ['windows','linux'],
+        categories: getListeCategories(data),
+        genres: [],
+        steamspy: getListSteamSpy(data),
+        test: test(),
+        searchPage: 2,
+        url : 'http://localhost:9090/v1/game/filter/1?'
     },
     reducers: {
         changeDisplayType: (state: { displayType: boolean }) => {
             state.displayType = !state.displayType;
         },
-        updateFilters : (state : {filter : Filter, test : number}, action: { payload : Filter}) => {
+        updateFilters: (state: { filter: Filter, test: number }, action: { payload: Filter }) => {
             state.filter = action.payload
             state.test = test()
         },
-        changeDateByYear : (state : {filter : Filter}) => {
+        changeDateByYear: (state: { filter: Filter }) => {
             state.filter.dateByYear = !state.filter.dateByYear
         },
-        changeDateByRange : (state : {filter : Filter}) => {
+        changeDateByRange: (state: { filter: Filter }) => {
             state.filter.dateByRange = !state.filter.dateByRange
         },
-        loadGames: (state: { game: Game[] }, action: { payload: Game[] }) => {
-            state.game = state.game.concat(action.payload);
+        loadGames: (state: { game: Game[], searchPage: number }, action: { payload: [Game[], number] }) => {
+            if (action.payload[1] < 3) {
+                state.game = action.payload[0]
+            } else {
+                state.game = state.game.concat(action.payload[0]);
+            }
+            state.searchPage = action.payload[1]
+
         },
+        loadGenres: (state: { genres: string[] }, action: { payload: [] }) => {
+            state.genres = action.payload
+        },
+        changeUrl : (state : {url : string}, action : {payload : string})=> {
+            state.url = action.payload
+        }
     },
 });
 
 
-export const {changeDisplayType, updateFilters, changeDateByYear, changeDateByRange, loadGames} = Slice.actions;
+export const {
+    changeDisplayType,
+    updateFilters,
+    changeDateByYear,
+    changeDateByRange,
+    loadGames,
+    loadGenres,
+    changeUrl
+} = Slice.actions;
 
 export default Slice.reducer;
