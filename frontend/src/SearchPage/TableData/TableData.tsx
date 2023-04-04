@@ -30,7 +30,7 @@ const TableData = () => {
             fetch("http://localhost:9090/v1/game/filter/" + searchPage)
                 .then(response => response.json())
                 .then(response => {
-                    dispatch(loadGames([response, searchPage+1]));
+                    dispatch(loadGames([response.results, searchPage+1]));
                 })
                 .catch(error => alert("Erreur : " + error));
             setLastCall(now);

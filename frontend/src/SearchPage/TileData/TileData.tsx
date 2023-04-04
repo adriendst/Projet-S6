@@ -85,7 +85,7 @@ const TileData = () => {
             fetch(coucou)
                 .then(response => response.json())
                 .then(response => {
-                    dispatch(loadGames([response, searchPage + 1]));
+                    dispatch(loadGames([response.results, searchPage + 1]));
                 })
                 .catch(error => alert("Erreur : " + error));
             setLastCall(now);

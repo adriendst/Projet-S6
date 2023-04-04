@@ -73,7 +73,7 @@ const SearchPage = () => {
         fetch(test)
             .then(response => response.json())
             .then(response => {
-                dispatch(loadGames([response, 2]));
+                dispatch(loadGames([response.results, 2]));
             })
             .catch(error => alert("Erreur : " + error));
 
