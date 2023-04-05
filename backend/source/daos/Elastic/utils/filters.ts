@@ -1,5 +1,6 @@
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { FilterParameters } from '@steam-wiki/types';
+import logging from '../../../config/logging';
 
 export const getFuzzyFilter = (searchTerm: string, matchField: string, prefixField: string): QueryContainer => {
     return {

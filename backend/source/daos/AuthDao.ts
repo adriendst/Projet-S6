@@ -13,14 +13,16 @@ export interface IRefreshReponse {
 }
 
 export interface AuthDao extends BaseDao {
-    insertToken(arg0: { userId: string; token: string; userAgent: string }): unknown;
+    createUser(user: IRegister): Promise<boolean>;
 
     loginUser(params: ILogin): Promise<ILoginResponse>;
+
+    insertToken(arg0: { userId: string; token: string; userAgent: string }): unknown;
 
     findByEmail(email: string): Promise<User | undefined>;
 
     createUser(user: IRegister): Promise<boolean>;
-
+    
     findToken(tokenData: { userId: string; token: string; userAgent: string }): Promise<IToken | null>
 }
 

@@ -1,0 +1,36 @@
+.ant-row, .ant-col {
+
+  padding: 15px;
+}
+
+.ant-image {
+    width: 90%;
+    height: auto;
+    padding: 15px;
+}
+
+.container {
+    display: flex !important;
+    justify-content: center;
+    align-content: center;
+   
+  }
+
+.addGame {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+    align-content: center;
+    text-align: center;
+}
+
+.slick-slider {
+   
+    background-color: black;
+  }
+iframe , video {
+    width: 80%;
+    height: 550px;
+    border: black;
+}
+

@@ -4,6 +4,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {State} from "../../store";
 import {Filter, updateFilters} from "../../Slice/Slice";
 import Fuse from "fuse.js";
+import {Simulate} from "react-dom/test-utils";
+import select = Simulate.select;
 
 interface MultipleSelectInterface{
     filters : Filter,
@@ -14,22 +16,11 @@ const MultipleSelectWithFuzzySearch = ({filters, selectParam} : MultipleSelectIn
 
     const dispatch = useDispatch()
 
-    const steam =  useSelector((state: State) => state.steam) as Record<string, any>;
-    const params = steam[selectParam.toLowerCase()]
-
     const filtersRecord = filters as Record<string,any>
     let filter = filtersRecord[selectParam.toLowerCase()]
 
     const [value, setValue] = useState<string[]>(filter)
 
-    const options = {
-        includeScore: true,
-        keys:['name']
-    };
-
-    const fuse = new Fuse(params.map((param : string) => {
-        return param
-    }), options)
 
     const placeholder = `Search a game by his ${selectParam.toLowerCase()}`
 
@@ -41,12 +32,21 @@ const MultipleSelectWithFuzzySearch = ({filters, selectParam} : MultipleSelectIn
     };
 
     const [filteredOptions, setFilteredOptions] = useState<{ value: string; label: string; }[]>([]);
-    const [search, setSearch] = useState<string>('');
     const test = (value: string)=> {
-        const result = fuse.search(value);
-        const filteredOptions = result.map((r) => ({value: r.item as string, label: r.item as string}));
-        setFilteredOptions(filteredOptions);
-        setSearch(value)
+        console.log(selectParam)
+        let url;
+        if(selectParam === 'Developers') {
+             url = `http://localhost:9090/v1/developer/complete?searchText=${value}&results=20`;
+        }
+        else{
+             url = `http://localhost:9090/v1/publisher/complete?searchText=${value}&results=20`
+        }
+        fetch(url)
+            .then(response => response.json())
+            .then(response => {
+                setFilteredOptions(response.results ? response.results.map((r : string) => ({value : r, label : r})) : undefined);
+            })
+            .catch(error => alert("Erreur : " + error));
     }
 
     return (
@@ -61,9 +61,7 @@ const MultipleSelectWithFuzzySearch = ({filters, selectParam} : MultipleSelectIn
                 onChange={handleChange}
                 onSearch={test}
                 filterOption={false}
-                options={search !== '' ? filteredOptions : params.map((param : string) => {
-                    return {label : param, value : param}
-                })}
+                options={filteredOptions}
             />
         </div>
     );
