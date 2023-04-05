@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 
 /** Routes go here */
 app.use(`/${config.server.api_version}/auth`, authRoutes);
-app.use(`/${config.server.api_version}/register`, registerRoutes);
+app.use(`/${config.server.api_version}/auth/register`, registerRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
 app.use(`/${config.server.api_version}/developer`, developerRoutes);
 app.use(`/${config.server.api_version}/publisher`, publisherRoutes);

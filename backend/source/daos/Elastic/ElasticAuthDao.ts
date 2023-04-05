@@ -1,6 +1,8 @@
 import { ElasticBaseDao } from './ElasticConnector';
 import AuthDao from '../AuthDao';
-import { ILogin, IRegister } from '../../interfaces/auth';
+import { ILogin, IRegister, User } from '../../interfaces/auth';
+
+const NAMESPACE = 'AUTH_DAO';
 
 const ElasticAuthDao: AuthDao = {
     ...ElasticBaseDao,
@@ -11,11 +13,11 @@ const ElasticAuthDao: AuthDao = {
         });
     },
 
-    insertToken: function (arg0: { userId: number; token: string; userAgent: string }): unknown {
+    insertToken: function (arg0: { userId: string; token: string; userAgent: string }): unknown {
         throw new Error('Function not implemented.');
     },
 
-    findByEmail: async function (email: string) {
+    findByEmail: async function (email: string): Promise<User | undefined> {
         const { body } = await ElasticBaseDao.client.search({
             index: 'user',
             body: {
@@ -26,7 +28,14 @@ const ElasticAuthDao: AuthDao = {
                 },
             },
         });
-        return body.hits.hits[0]?._source;
+        if (body.hits.hits.length === 0) {
+            return undefined;
+        }
+        const userDoc = body.hits.hits[0] as {
+            _id: string;
+            _source: any;
+        };
+        return { ...userDoc._source, id: userDoc._id };
     },
 
     createUser: async function (user: IRegister) {

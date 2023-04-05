@@ -10,10 +10,10 @@ const router = express.Router();
 
 /**
  * @swagger
- * /v1/register:
+ * /v1/auth/register:
  *   post:
  *     summary: Create a new user
- *     tags: [Register]
+ *     tags: [Auth]
  *     consumes:
  *       - application/json
  *     requestBody:
@@ -23,10 +23,10 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/RegisterRequestBody'
  *     responses:
- *       200:
- *         description: Sucessfully retrived publishers names
+ *       201:
+ *         description: Sucessfully created the new user
  *       422:
- *         description: The entered parameters do not correspond to the schema
+ *         description: The body does not correspond to the required body schema
  */
 router.post('/', ValidateJoi(UserSchemas.register), async (req: Request<{}, {}, RegisterRequestBody>, res: Response) => {
     const body = req.body as RegisterRequestBody;
@@ -58,26 +58,10 @@ export default router;
 
 /**
  * @swagger
- * tags:
- *   name: Register
- *   description: The register managing API endpoint
- *
  * components:
  *   schemas:
  *     RegisterRequestBody:
- *       type: object
- *       required:
- *         - email
- *         - password
- *       properties:
- *         email:
- *           type: email
- *           description: The email of the user
- *         password:
- *           type: string
- *           description: The password of the user
- *       example:
- *         email: test123@mail.com
- *         password: Password123!
+ *       allOf:
+ *         - $ref: '#/components/schemas/UserData'
  *
  */

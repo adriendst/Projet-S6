@@ -1,4 +1,4 @@
-import { ILogin, IRegister } from '../interfaces/auth';
+import { ILogin, IRegister, User } from '../interfaces/auth';
 import { IToken, ITokenData } from '../interfaces/jwt';
 import { BaseDao } from './Daos';
 
@@ -13,11 +13,11 @@ export interface IRefreshReponse {
 }
 
 export interface AuthDao extends BaseDao {
-    insertToken(arg0: { userId: number; token: string; userAgent: string }): unknown;
+    insertToken(arg0: { userId: string; token: string; userAgent: string }): unknown;
 
     loginUser(params: ILogin): Promise<ILoginResponse>;
 
-    findByEmail(email: string): Promise<any>;
+    findByEmail(email: string): Promise<User | undefined>;
 
     createUser(user: IRegister): Promise<boolean>;
 }

@@ -3,5 +3,5 @@ export interface IToken {
 }
 
 export interface ITokenData {
-    userId: number;
+    userId: string;
 }
