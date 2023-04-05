@@ -4,9 +4,9 @@ import { PLATFORM } from './types/platform';
 import { STEAMSPY_TAG } from './types/steamspy_tag';
 
 export interface FilterParameters {
-    searchText?: string; //ASC / DESC
-    startDate?: Date;
-    endDate?: Date; // IF endDate is present == range else exact date
+    name?: string;
+    start_date?: string;
+    end_date?: string;
     developers?: string | Array<string>;
     publishers?: string | Array<string>;
     platforms?: PLATFORM | Array<PLATFORM>;
@@ -15,6 +15,6 @@ export interface FilterParameters {
     categories?: CATEGORY | Array<CATEGORY>;
     genres?: GENRE | Array<GENRE>;
     tags?: STEAMSPY_TAG | Array<STEAMSPY_TAG>;
-    orderBy?: string;
-    orderType?: 'asc' | 'desc';
+    order_by?: string;
+    order_type?: 'asc' | 'desc';
 }

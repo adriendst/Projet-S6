@@ -25,3 +25,15 @@ export const ValidateQueryJoi = (schema: ObjectSchema) => {
             .catch((error) => res.status(HTTP_STATUS_CODE.UnprocessableEntity).json({ error }));
     };
 };
+
+export const ValidateAdvancedJoi = (schema: ObjectSchema) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        schema
+            .validateAsync(req)
+            .then((validatedReq) => {
+                req = validatedReq;
+                next();
+            })
+            .catch((error) => res.status(HTTP_STATUS_CODE.UnprocessableEntity).json({ error }));
+    };
+};

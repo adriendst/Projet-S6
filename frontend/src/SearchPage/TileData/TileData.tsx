@@ -9,7 +9,7 @@ import {Link} from "react-router-dom";
 import AutoSizer from "react-virtualized-auto-sizer";
 
 import {FixedSizeGrid as Grid} from "react-window";
-import {loadGames} from "../../Slice/Slice";
+import {changeUrl, loadGames} from "../../Slice/Slice";
 
 const TileData = () => {
 
@@ -18,6 +18,9 @@ const TileData = () => {
     const games = useSelector((state: State) => state.steam.game);
 
     const columnCount = (width: number) => {
+        if (games.length === 1 || games.length === 2) {
+            return 1
+        }
         if (width < 1200) {
             if (width < 600) {
                 return 1
@@ -30,6 +33,7 @@ const TileData = () => {
     }
 
     const rowHeight = (width: number) => {
+
 
         if (1200 < width) {
             if (1400 > width) {
@@ -56,24 +60,37 @@ const TileData = () => {
     }
 
     const [lastCall, setLastCall] = useState(0);
-    const [searchPage, setSeachPage] = useState<number>(2)
+    const searchPage = useSelector((state: State) => state.steam.searchPage)
+
+    const url = useSelector((state: State) => state.steam.url)
+
     const addGamesOnScroll = (scrollTop: number, width: number) => {
         const now = Date.now();
         const timeSinceLastCall = now - lastCall;
-        const minimumInterval = 500;
+        const minimumInterval = 750;
 
         if (scrollTop > (rowHeight(width) * games.length) / columnCount(Number(width)) / 1.20 && timeSinceLastCall >= minimumInterval) {
-            fetch("http://localhost:9090/v1/game/filter/" + searchPage)
+            console.log(url)
+            const split = url.split('?')
+            console.log(split)
+            let coucou;
+            if (split[1] !== undefined && split[1] !== "") {
+                coucou = "http://localhost:9090/v1/game/filter/" + 1  + '?' + split[1]
+            } else {
+                coucou = "http://localhost:9090/v1/game/filter/" + searchPage +'?'
+            }
+            console.log(coucou)
+
+            dispatch(changeUrl(coucou))
+            fetch(coucou)
                 .then(response => response.json())
                 .then(response => {
-                    dispatch(loadGames(response));
+                    dispatch(loadGames([response.results, searchPage + 1]));
                 })
                 .catch(error => alert("Erreur : " + error));
-            setSeachPage(searchPage +1)
             setLastCall(now);
         }
     }
-
 
 
     return (
@@ -97,7 +114,8 @@ const TileData = () => {
                                 <div style={{...style}}>
                                     <Link to={`/game/${games[index].appid}`} className={'Link'}>
 
-                                        <Card cover={<img alt={games[index].name} src={`https://steamcdn-a.akamaihd.net/steam/apps/${games[index].appid}/header.jpg`}/>}
+                                        <Card cover={<img alt={games[index].name}
+                                                          src={`https://steamcdn-a.akamaihd.net/steam/apps/${games[index].appid}/header.jpg`}/>}
                                               hoverable style={{width: "100%", height: "100%"}} bordered>
                                             <div style={{display: "flex", justifyContent: "space-between"}}>
                                                 <div>

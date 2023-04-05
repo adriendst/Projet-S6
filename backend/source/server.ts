@@ -16,6 +16,7 @@ import { HTTP_STATUS, HTTP_STATUS_CODE } from './config/http_status';
 import authRoutes from './routes/auth';
 import gameRoutes from './routes/game';
 import developerRoutes from './routes/delveoper';
+import publisherRoutes from './routes/publisher';
 import categoryRoutes from './routes/category';
 import genreRoutes from './routes/genre';
 
@@ -78,6 +79,7 @@ app.use((req, res, next) => {
 app.use(`/${config.server.api_version}/auth`, authRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
 app.use(`/${config.server.api_version}/developer`, developerRoutes);
+app.use(`/${config.server.api_version}/publisher`, publisherRoutes);
 app.use(`/${config.server.api_version}/category`, categoryRoutes);
 app.use(`/${config.server.api_version}/genre`, genreRoutes);
 

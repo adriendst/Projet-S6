@@ -9,16 +9,19 @@ export const GAME_MAPPINGS: TypeMapping = {
         name: {
             type: 'text',
             fields: {
-                autocomplete: {
-                    type: 'search_as_you_type',
-                },
+                // autocomplete: {
+                //     type: 'search_as_you_type',
+                // },
+                // completion: {
+                //     type: 'completion',
+                // },
                 fuzzy: {
                     type: 'text',
                     analyzer: 'standard',
                 },
-                sort: {
-                    type: 'keyword',
-                },
+                // keyword: {
+                //     type: 'keyword',
+                // },
             },
         },
         release_date: {
@@ -31,20 +34,31 @@ export const GAME_MAPPINGS: TypeMapping = {
         developer: {
             type: 'keyword',
             fields: {
+                fuzzy: {
+                    type: 'text',
+                    analyzer: 'standard',
+                },
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
-                completion: {
-                    type: 'completion',
-                },
+                // completion: {
+                //     type: 'completion',
+                // },
             },
         },
         publisher: {
             type: 'keyword',
             fields: {
+                fuzzy: {
+                    type: 'text',
+                    analyzer: 'standard',
+                },
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
+                // completion: {
+                //     type: 'completion',
+                // },
             },
         },
         platforms: {
@@ -106,44 +120,6 @@ export const GAME_MAPPINGS: TypeMapping = {
         },
         price: {
             type: 'float',
-        },
-    },
-};
-
-export const GAME_SETTINGS: Record<string, any> = {
-    analysis: {
-        filter: {
-            autocomplete_filter: {
-                type: 'edge_ngram',
-                min_gram: 1,
-                max_gram: 10,
-            },
-        },
-        analyzer: {
-            autocomplete: {
-                type: 'custom',
-                tokenizer: 'standard',
-                filter: ['lowercase', 'autocomplete_filter'],
-            },
-        },
-    },
-};
-
-export const OTHER_SETTINGS = {
-    analysis: {
-        analyzer: {
-            autocomplete: {
-                tokenizer: 'autocomplete',
-                filter: ['lowercase'],
-            },
-        },
-        tokenizer: {
-            autocomplete: {
-                type: 'edge_ngram',
-                min_gram: 1,
-                max_gram: 20,
-                token_chars: ['letter', 'digit'],
-            },
         },
     },
 };

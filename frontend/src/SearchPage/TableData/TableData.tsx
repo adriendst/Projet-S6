@@ -1,17 +1,40 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {State} from "../../store";
 
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {FixedSizeList as List} from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer'
 import './TableData.css'
 
 import {Link} from "react-router-dom";
+import {loadGames} from "../../Slice/Slice";
 
 const TableData = () => {
 
+    const dispatch = useDispatch()
+
     const games = useSelector((state: State) => state.steam.game);
 
+    const [lastCall, setLastCall] = useState(0);
+    const searchPage = useSelector((state : State) => state.steam.searchPage)
+
+    const addGamesOnScroll = (scrollTop: number, width: number) => {
+        const now = Date.now();
+        const timeSinceLastCall = now - lastCall;
+        const minimumInterval = 750;
+
+        if (scrollTop > 150 * games.length / 1.20 && timeSinceLastCall >= minimumInterval) {
+            let url = "http://localhost:9090/v1/game/filter/" + searchPage
+            console.log(url)
+
+            fetch("http://localhost:9090/v1/game/filter/" + searchPage)
+                .then(response => response.json())
+                .then(response => {
+                    dispatch(loadGames([response.results, searchPage+1]));
+                })
+                .catch(error => alert("Erreur : " + error));
+            setLastCall(now);
+        }    }
 
     return (
         <ul className={'table'}>
@@ -37,6 +60,9 @@ const TableData = () => {
                         itemSize={150}
                         height={Number(height)}
                         width={Number(width)}
+                        onScroll={(scrollTop) => {
+                            addGamesOnScroll(scrollTop.scrollOffset, Number(width))
+                        }}
                     >
                         {({index, style}) => {
                             return (

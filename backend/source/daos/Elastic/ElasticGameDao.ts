@@ -17,35 +17,79 @@ const PAGE_SIZE = 50;
 const ElasticGameDao: GameDao = {
     ...ElasticBaseDao,
 
-    completeName(params: CompletionParameters): Promise<Array<string>> {
-        return new Promise<Array<string>>(async (resolve, reject) => {
+    completeName(params: CompletionParameters): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             try {
                 logging.info(NAMESPACE, 'completeName', params);
+
+                const maxResultSize = params.results ?? DEFAULTS.autocompletion_results;
+
+                const query = {
+                    // bool: {
+                    //     should: [
+                    //         {
+                    //             fuzzy: {
+                    //                 'name.fuzzy': {
+                    //                     value: params.searchText,
+                    //                     fuzziness: '3',
+                    //                     prefix_length: 2,
+                    //                 },
+                    //             },
+                    //         },
+                    //         {
+                    //             match: {
+                    //                 'name.fuzzy': {
+                    //                     query: params.searchText,
+                    //                     fuzziness: '2',
+                    //                     prefix_length: 2,
+                    //                 },
+                    //             },
+                    //         },
+                    //         {
+                    //             match_bool_prefix: {
+                    //                 'name.autocomplete': {
+                    //                     query: params.searchText,
+                    //                 },
+                    //             },
+                    //         },
+                    //     ],
+                    //     minimum_should_match: 1,
+                    // },
+
+                    match: {
+                        'name.fuzzy': {
+                            query: params.searchText,
+                            fuzziness: 2,
+                            prefix_length: 1,
+                            boost: 2,
+                        },
+                    },
+                };
+
+                logging.info(NAMESPACE, 'completeName took:', params.results);
 
                 const { body } = await ElasticConnector.instance.client.search<Game>({
                     index: indexName,
                     body: {
-                        size: params.results ?? DEFAULTS.autocompletion_results,
-                        query: {
-                            // match: {
-                            //     'name.fuzzy': {
-                            //         query: params.searchText,
-                            //         fuzziness: 'AUTO',
-                            //         operator: 'AND',
-                            //         prefix_length: 2,
-                            //     },
-                            // },
-                            match_bool_prefix: {
-                                'name.autocomplete': {
-                                    query: params.searchText,
-                                },
-                            },
-                        },
+                        query,
+                        size: maxResultSize,
                     },
                 });
-                resolve(body.hits.hits.map((doc) => doc._source!.name));
+
+                const countRes = await ElasticConnector.instance.client.count({
+                    index: indexName,
+                    body: { query },
+                });
+
+                logging.info(NAMESPACE, 'completeName took:', body.took);
+                resolve({
+                    searchText: params.searchText,
+                    maxResults: maxResultSize,
+                    total: countRes.body.count,
+                    results: body.hits.hits.map((doc) => doc._source!.name),
+                });
             } catch (error) {
-                console.log(error);
+                logging.error(NAMESPACE, 'completeName', error);
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
             }
         });
@@ -58,15 +102,17 @@ const ElasticGameDao: GameDao = {
                 const indicies = [indexName, 'description', 'media', 'support', 'requirements'];
                 const results = await Promise.all(
                     indicies.map((index) =>
-                        ElasticConnector.instance.client.get({
-                            index: index,
-                            id: params.id,
-                        }),
+                        ElasticConnector.instance.client
+                            .get({
+                                index: index,
+                                id: params.id,
+                            })
+                            .catch(() => null),
                     ),
                 );
                 let body = {};
                 for (const result of results) {
-                    if (result.body._source) {
+                    if (result !== null && result.body._source) {
                         body = { ...body, ...result.body._source };
                     }
                 }
@@ -88,6 +134,18 @@ const ElasticGameDao: GameDao = {
                 logging.info(NAMESPACE, 'params', params);
                 const filters: Array<QueryContainer> = [];
                 const sort: Sort = [];
+                if (params.name !== undefined) {
+                    filters.push({
+                        match: {
+                            'name.fuzzy': {
+                                query: params.name,
+                                fuzziness: 2,
+                                prefix_length: 1,
+                                boost: 2,
+                            },
+                        },
+                    });
+                }
                 if (params.developers !== undefined) {
                     if (Array.isArray(params.developers)) filters.push({ terms: { developer: params.developers } });
                     else filters.push({ term: { developer: params.developers } });
@@ -103,51 +161,82 @@ const ElasticGameDao: GameDao = {
                     } else filters.push({ term: { platforms: params.platforms } });
                 }
                 if (params.categories !== undefined && params.categories.length > 0) {
-                    if (Array.isArray(params.categories)) filters.push(...params.categories.map((category) => ({ term: { categories: category } })));
-                    else filters.push({ term: { categories: params.categories } });
+                    if (Array.isArray(params.categories)) filters.push(...params.categories.map((category) => ({ term: { 'categories.keyword': category } })));
+                    else filters.push({ term: { 'categories.keyword': params.categories } });
                 }
                 if (params.genres !== undefined && params.genres.length > 0) {
-                    if (Array.isArray(params.genres)) filters.push(...params.genres.map((genre) => ({ term: { genres: genre } })));
-                    else filters.push({ term: { genres: params.genres } });
+                    if (Array.isArray(params.genres)) filters.push(...params.genres.map((genre) => ({ term: { 'genres.keyword': genre } })));
+                    else filters.push({ term: { 'genres.keyword': params.genres } });
                 }
                 if (params.required_age !== undefined) {
                     filters.push({ range: { required_age: { gte: 0, lte: params.required_age } } });
                 }
-                // if (params.startDate !== undefined) {
-                //     filters.push({ range: { release_date: { lt: '1955-01-31', gt: '1955-01-01', format: 'yyyy-MM-dd', } } });
-                // }
+                if (params.start_date !== undefined) {
+                    if (params.start_date.length === 4 && params.end_date === undefined) {
+                        filters.push({ range: { release_date: { gte: `${params.start_date}-01-01`, lte: `${params.start_date}-12-31` } } });
+                    } else {
+                        const startDate = params.start_date.length === 4 ? `${params.start_date}-01-01` : params.start_date;
+                        const endDate = params.end_date === undefined ? params.start_date : params.end_date.length === 4 ? `${params.end_date}-12-31` : params.end_date;
+                        filters.push({ range: { release_date: { gte: startDate, lte: endDate } } });
+                    }
+                }
                 logging.info(NAMESPACE, 'filters', filters);
 
-                if (params.orderBy !== undefined) {
-                    const orderType = params.orderType ?? 'asc';
-                    const orderBy = params.orderBy ?? 'name';
+                if (params.order_by !== undefined) {
+                    const orderType = params.order_type ?? DEFAULTS.sorting;
+                    let orderBy = params.order_by ?? 'name';
+                    if (orderBy === 'name') orderBy += '.keyword';
                     const sorter = {} as any;
                     sorter[orderBy] = { order: orderType };
                     sort.push(sorter);
                 }
-                logging.info(NAMESPACE, 'filters', filters);
+
+                const query = {
+                    bool: {
+                        must: filters,
+                    },
+                };
 
                 const { body } = await ElasticConnector.instance.client.search<Game>({
                     index: indexName,
                     body: {
-                        query: {
-                            bool: {
-                                must: filters,
-                            },
-                        },
+                        query,
                         sort,
                         from: (page - 1) * PAGE_SIZE,
                         size: PAGE_SIZE,
                     },
                 });
-                // resolve(body.hits.hits.map((doc) => doc._source!.developer));
-                resolve(body.hits.hits.map((hit) => hit._source));
+
+                const countRes = await ElasticConnector.instance.client.count({
+                    index: indexName,
+                    body: { query },
+                });
+                resolve({
+                    page: page,
+                    total: countRes.body.count,
+                    results: body.hits.hits.map((doc) => doc._source),
+                    filters,
+                });
+                // resolve(body.hits.hits.map((hit) => hit._source));
                 // resolve(body);
             } catch (error) {
                 reject({ code: 500, message: 'An unexpected error occured', cause: error });
             }
         });
     },
+};
+
+const getFuzzyFilter = (query: string): QueryContainer => {
+    return {
+        match: {
+            'name.fuzzy': {
+                query,
+                fuzziness: 'AUTO',
+                operator: 'AND',
+                prefix_length: 2,
+            },
+        },
+    };
 };
 
 export default ElasticGameDao;
