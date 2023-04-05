@@ -17,6 +17,7 @@ import TagDao from './TagDao';
 export interface BaseDao {
     destroy(): Promise<void>;
     client: TypedClient;
+    tokens: any;
 }
 
 const DAOS: {

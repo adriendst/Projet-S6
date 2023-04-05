@@ -21,7 +21,9 @@ export interface AuthDao extends BaseDao {
 
     findByEmail(email: string): Promise<User | undefined>;
 
-    // getById(userId: string): Promise<User>;
+    createUser(user: IRegister): Promise<boolean>;
+    
+    findToken(tokenData: { userId: string; token: string; userAgent: string }): Promise<IToken | null>
 }
 
 export default AuthDao;
