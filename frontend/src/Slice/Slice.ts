@@ -5,7 +5,7 @@ export interface Filter {
     name: string | undefined,
     dateByYear: boolean,
     dateByRange: boolean
-    release_date: Date[],
+    release_date: string[],
     developers: string[],
     publishers: string[],
     platforms: string[],
@@ -132,11 +132,6 @@ function getListSteamSpy(data: Array<any>) {
     return platformsList;
 }
 
-let coucou = 0;
-const test = () => {
-    return coucou++
-}
-
 
 export const Slice = createSlice({
     name: 'steam',
@@ -158,11 +153,10 @@ export const Slice = createSlice({
         game: [],
         developers: getListeDeveloppeurs(data),
         publishers: getListePublishers(data),
-        platforms: ['windows','linux'],
-        categories: getListeCategories(data),
+        platforms: ['windows','linux', 'mac'],
+        categories: [],
         genres: [],
         steamspy: getListSteamSpy(data),
-        test: test(),
         searchPage: 2,
         url : 'http://localhost:9090/v1/game/filter/1?'
     },
@@ -170,15 +164,15 @@ export const Slice = createSlice({
         changeDisplayType: (state: { displayType: boolean }) => {
             state.displayType = !state.displayType;
         },
-        updateFilters: (state: { filter: Filter, test: number }, action: { payload: Filter }) => {
+        updateFilters: (state: { filter: Filter}, action: { payload: Filter }) => {
             state.filter = action.payload
-            state.test = test()
         },
         changeDateByYear: (state: { filter: Filter }) => {
             state.filter.dateByYear = !state.filter.dateByYear
         },
         changeDateByRange: (state: { filter: Filter }) => {
             state.filter.dateByRange = !state.filter.dateByRange
+            state.filter.release_date = []
         },
         loadGames: (state: { game: Game[], searchPage: number }, action: { payload: [Game[], number] }) => {
             if (action.payload[1] < 3) {
@@ -191,6 +185,9 @@ export const Slice = createSlice({
         },
         loadGenres: (state: { genres: string[] }, action: { payload: [] }) => {
             state.genres = action.payload
+        },
+        loadCategories: (state: { categories: string[] }, action: { payload: [] }) => {
+            state.categories = action.payload
         },
         changeUrl : (state : {url : string}, action : {payload : string})=> {
             state.url = action.payload
@@ -206,6 +203,7 @@ export const {
     changeDateByRange,
     loadGames,
     loadGenres,
+    loadCategories,
     changeUrl
 } = Slice.actions;
 

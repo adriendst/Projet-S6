@@ -7,6 +7,7 @@ const Layout = () => {
     return (
         <div className={'layout'}>
             <div className={'layoutContent'}>
+                <Link to={'/'} className={'link'}>Home</Link>
                 <Link to={'/login'} className={'link'}>Login</Link>
             </div>
         </div>

@@ -70,22 +70,16 @@ const TileData = () => {
         const minimumInterval = 750;
 
         if (scrollTop > (rowHeight(width) * games.length) / columnCount(Number(width)) / 1.20 && timeSinceLastCall >= minimumInterval) {
-            console.log(url)
-            const split = url.split('?')
-            console.log(split)
-            let coucou;
-            if (split[1] !== undefined && split[1] !== "") {
-                coucou = "http://localhost:9090/v1/game/filter/" + 1  + '?' + split[1]
-            } else {
-                coucou = "http://localhost:9090/v1/game/filter/" + searchPage +'?'
-            }
-            console.log(coucou)
 
-            dispatch(changeUrl(coucou))
-            fetch(coucou)
+            const split = url.split('?')
+            let page = Number(split[0][split[0].length -1]) + 1
+            let newUrl = split[0].slice(0, -1) + page + '?' + split[1];
+
+            dispatch(changeUrl(newUrl))
+            fetch(newUrl)
                 .then(response => response.json())
                 .then(response => {
-                    dispatch(loadGames([response.results, searchPage + 1]));
+                    dispatch(loadGames([response.results, searchPage +1]));
                 })
                 .catch(error => alert("Erreur : " + error));
             setLastCall(now);
@@ -98,6 +92,7 @@ const TileData = () => {
             <AutoSizer className={'dqsdqs'}>
                 {({height, width}) => (
                     <Grid
+                        style={{overflowX: "hidden"}}
                         columnCount={columnCount(Number(width))}
                         columnWidth={Number(width) / columnCount(Number(width)) - 7.5}
                         height={Number(height)}

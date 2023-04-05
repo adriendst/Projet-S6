@@ -24,7 +24,7 @@ const MultipleSelect = ({filters, selectParam} : MultipleSelectInterface) => {
     const placeholder = `Search a game by his ${selectParam.toLowerCase()}`
 
     const handleChange = (value: string[]) => {
-        console.log(`Selected: ${value}`);
+        // console.log(`Selected: ${value}`);
         const newFilters = {...filters, [selectParam.toLowerCase()]: value};
         dispatch(updateFilters(newFilters));
         setValue(value);

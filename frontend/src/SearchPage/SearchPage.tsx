@@ -8,7 +8,7 @@ import Filter from "../Filter/Filter";
 import Layout from "../Layout/Layout";
 import './SearchPage.css'
 import {FaArrowAltCircleUp} from 'react-icons/fa'
-import {changeUrl, loadGames, loadGenres} from "../Slice/Slice";
+import {changeUrl, loadGames, loadGenres, loadCategories} from "../Slice/Slice";
 
 
 const SearchPage = () => {
@@ -30,45 +30,47 @@ const SearchPage = () => {
                     dispatch(loadGenres(response));
                 })
                 .catch(error => alert("Erreur : " + error));
+            fetch("http://localhost:9090/v1/category/all")
+                .then(response => response.json())
+                .then(response => {
+                    dispatch(loadCategories(response));
+                })
+                .catch(error => alert("Erreur : " + error));
         }
     }, []);
 
-
-    const url = useSelector((state: State) => state.steam.url)
 
     const filters = useSelector((state: State) => state.steam.filter);
     useEffect(() => {
         let test = 'http://localhost:9090/v1/game/filter/1?'
         const filtersRecord = filters as Record<string, any>
+        // console.log(filtersRecord)
         for (let filtersKey in filters) {
-            // console.log(filtersKey)
-            // console.log(filtersRecord[filtersKey])
-            // console.log(typeof filtersRecord[filtersKey])
-            // console.log(filters)
             if (typeof filtersRecord[filtersKey] !== "boolean") {
                 if (filtersRecord[filtersKey] !== undefined && filtersRecord[filtersKey].length !== 0) {
-                    if(filtersRecord[filtersKey].isArray){
-                        for(let i = 0; i<filtersRecord[filtersKey].length; i++){
-                            test = test + `&${filtersKey}=${filtersRecord[filtersKey][i]}}`
-                            console.log(test)
-
-
+                    if (typeof filtersRecord[filtersKey] === 'object') {
+                        if (filtersKey === 'release_date') {
+                            if (filtersRecord[filtersKey][0]) {
+                                if (filtersRecord[filtersKey][1]) {
+                                    test = test + `&start_date=${filtersRecord[filtersKey][0]}&end_date=${filtersRecord[filtersKey][1]}`
+                                } else {
+                                    test = test + `&start_date=${filtersRecord[filtersKey][0]}`
+                                }
+                            }
+                        } else {
+                            for (let i = 0; i < filtersRecord[filtersKey].length; i++) {
+                                test = test + `&${filtersKey}=${filtersRecord[filtersKey][i]}`
+                            }
                         }
-                    }
-                    else{
+                    } else {
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
-
                     }
-                    console.log(test)
-                    // dispatch(changeUrl(url + `&${filtersKey}=${filtersRecord[filtersKey]}`))
                 }
             }
         }
 
-        if (test === 'http://localhost:9090/v1/game/filter/1?') {
-            // dispatch(changeUrl(test))
-        }
-
+        dispatch(changeUrl(test))
+        console.log(test)
 
         fetch(test)
             .then(response => response.json())
