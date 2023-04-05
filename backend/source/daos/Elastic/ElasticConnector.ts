@@ -5,6 +5,9 @@ import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import { HTTP_STATUS } from '../../config/http_status';
 
 class ElasticConnector {
+    static getClient() {
+        throw new Error('Method not implemented.');
+    }
     private esclient: TypedClient;
     private static _instance: ElasticConnector | undefined = undefined;
 
