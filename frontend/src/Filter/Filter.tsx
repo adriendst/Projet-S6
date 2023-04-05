@@ -2,17 +2,17 @@ import React, {useState} from 'react';
 import {Checkbox, Collapse, Select, DatePicker, Input} from "antd";
 import {State} from "../store";
 import {useDispatch, useSelector} from "react-redux";
-import {changeDateByRange, changeDateByYear, changeUrl, loadGames, updateFilters} from "../Slice/Slice";
+import {changeDateByRange, changeDateByYear, changeUrl, loadGames, updateFilters, userConnection} from "../Slice/Slice";
 import './Filter.css'
 import MultipleSelect from "./MultipleSelect/MultipleSelect";
 import Fuse from "fuse.js";
 import MultipleSelectWithFuzzySearch from "./MultipleSelectWithFuzzySearch/MultipleSelectWithFuzzySearch";
 import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
-import { RangeValue } from 'rc-picker/lib/interface';
+import {RangeValue} from 'rc-picker/lib/interface';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-
+import {Link} from "react-router-dom";
 
 
 const Filter = () => {
@@ -23,11 +23,11 @@ const Filter = () => {
 
     const {Panel} = Collapse;
     const {RangePicker} = DatePicker;
-    const [searchNameValue, setNameSearchValue] = useState<string | undefined>(undefined);
     const [byYear, setByYear] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByYear));
     const [byRange, setByRange] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByRange));
     const filters = useSelector((state: State) => state.steam.filter);
     const [date, setDate] = useState<Dayjs[] | undefined>(undefined);
+    const refreshToken = useSelector((state: State) => state.steam.refreshToken)
 
 
     const [filteredOptions, setFilteredOptions] = useState<{ value: string; label: string; }[]>([]);
@@ -38,8 +38,7 @@ const Filter = () => {
     };
 
     const onSearchName = (value: string) => {
-        setNameSearchValue(value);
-        fetch(`http://localhost:9090/v1/game/complete/${value}?results=20`)
+        fetch(`http://localhost:9090/v1/game/complete?searchText=${value}&results=20`)
             .then(response => response.json())
             .then(response => {
                 setFilteredOptions(response.results ? response.results.map((r: string) => ({
@@ -48,6 +47,8 @@ const Filter = () => {
                 })) : undefined);
             })
             .catch(error => alert("Erreur : " + error));
+        const newFilters = {...filters, name: value};
+        dispatch(updateFilters(newFilters));
     }
 
 
@@ -62,7 +63,7 @@ const Filter = () => {
         let datejs = []
         for (let i = 0; i < dateStrings.length; i++) {
             date.push(dateStrings[i])
-            datejs.push(dayjs(dateStrings[i], dateFormat) )
+            datejs.push(dayjs(dateStrings[i], dateFormat))
         }
         console.log(dateStrings)
         const newFilters = {...filters, release_date: date};
@@ -108,12 +109,8 @@ const Filter = () => {
             }
         }
         setDate(datejs)
-        const newFilters = {...filters, release_date: date, dateByYear : !byYear};
+        const newFilters = {...filters, release_date: date, dateByYear: !byYear};
         dispatch(updateFilters(newFilters))
-        // console.log(byYear)
-        // console.log(filters.release_date)
-        // const newFilters = {...filters, release_date: [dateString]};
-        // dispatch(updateFilters(newFilters))
     }
 
     const onByRangeChange = () => {
@@ -124,7 +121,37 @@ const Filter = () => {
     const dateFormat = 'YYYY-MM-DD';
     const yearFormat = 'YYYY';
 
-    console.log(date)
+
+    const onOrderByChange = (value: string) => {
+        let newFilters;
+        if (value) {
+            newFilters = {...filters, order_by: value.toLowerCase()};
+        } else {
+            newFilters = {...filters, order_by: value};
+        }
+        dispatch(updateFilters(newFilters));
+    };
+
+    const onOrderTypeChange = (value: string) => {
+        let newFilters;
+        if (value) {
+            newFilters = {...filters, order_type: value.toLowerCase()};
+        } else {
+            newFilters = {...filters, order_type: value};
+        }
+        dispatch(updateFilters(newFilters));
+    };
+
+    const onAndPlatformsChange = (value: string) => {
+        let newFilters;
+        if (value) {
+            newFilters = {...filters, and_platforms: value.toLowerCase()};
+        } else {
+            newFilters = {...filters, and_platforms: value};
+        }
+        dispatch(updateFilters(newFilters));
+    };
+
 
     return (
         <div className={'filterDiv'}>
@@ -150,7 +177,19 @@ const Filter = () => {
                         </div>
                         <div>
                             <MultipleSelect filters={filters} selectParam={'Platforms'}/>
-                            <MultipleSelect filters={filters} selectParam={'Categories'}/>
+                            <div className={'divInput'}>
+                                <div>And Platforms</div>
+                                <Select disabled={filters.platforms.length >= 2
+                                }
+                                        allowClear
+                                        defaultValue={filters.and_platforms !== "" ? filters.and_platforms : null}
+                                        placeholder={'And platforms'} className={'inputSize'}
+                                        onChange={onAndPlatformsChange}
+                                        options={[{label: 'True', value: 'True'}, {
+                                            label: 'False',
+                                            value: 'False'
+                                        }]}></Select>
+                            </div>
                         </div>
                         <div>
                             <MultipleSelect filters={filters} selectParam={'Genres'}/>
@@ -160,9 +199,41 @@ const Filter = () => {
                                        value={filters.required_age} onChange={onAgeChange}></Input>
                             </div>
                         </div>
-                        {/*<div>*/}
+                        <div>
+                            <MultipleSelect filters={filters} selectParam={'Categories'}/>
+                            {refreshToken === undefined ? <div></div> :
+                                <div className={'divInput'}>
+                                    <div>Search on my games</div>
+                                    <div>
+                                        <Checkbox onChange={onByYearChange}>My Games</Checkbox>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div>
+                            <div className={'divInput'}>
+                                <div>Order By</div>
+                                <Select allowClear defaultValue={filters.order_by !== "" ? filters.order_by : null}
+                                        placeholder={'Order by'} className={'inputSize'} onChange={onOrderByChange}
+                                        options={[{label: 'Name', value: 'Name'}, {
+                                            label: 'Release Date',
+                                            value: 'Release_Date'
+                                        }, {label: 'Developer', value: 'Developer'}, {
+                                            label: 'Publisher',
+                                            value: 'Publisher'
+                                        }, {label: 'Required Age', value: 'Required_Age'}]}></Select>
+                            </div>
+                            <div className={'divInput'}>
+                                <div>Order Type</div>
+                                <Select allowClear defaultValue={filters.order_type !== "" ? filters.order_type : null}
+                                        placeholder={'Order type'} className={'inputSize'} onChange={onOrderTypeChange}
+                                        options={[{label: 'Asc', value: 'Asc'}, {
+                                            label: 'Desc',
+                                            value: 'Desc'
+                                        }]}></Select>
+                            </div>
 
-                        {/*</div>*/}
+                        </div>
                     </div>
                     <div className={'divInput'}>
                         <div style={{display: 'flex', justifyContent: "center"}}>Date</div>
@@ -182,16 +253,20 @@ const Filter = () => {
                                         onChange={onRangeDateChange}
                                         picker={'year'} defaultValue={date as RangeValue<Dayjs>}
                                     /> : byYear && !byRange ?
-                                        <DatePicker picker={'year'} onChange={onDateChange} defaultValue={date ? date[0] : undefined}
+                                        <DatePicker picker={'year'} onChange={onDateChange}
+                                                    defaultValue={date ? date[0] : undefined}
                                         /> : !byYear && byRange ?
-                                            <RangePicker onChange={onRangeDateChange} defaultValue={date as RangeValue<Dayjs>}
-                                             /> :
-                                            <DatePicker onChange={onDateChange} defaultValue={date ? date[0] : undefined}
+                                            <RangePicker onChange={onRangeDateChange}
+                                                         defaultValue={date as RangeValue<Dayjs>}
+                                            /> :
+                                            <DatePicker onChange={onDateChange}
+                                                        defaultValue={date ? date[0] : undefined}
                                             />
                                 }
                             </div>
                         </div>
                     </div>
+
                 </Panel>
             </Collapse>
         </div>

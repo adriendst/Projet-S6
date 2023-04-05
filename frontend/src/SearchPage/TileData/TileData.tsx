@@ -18,7 +18,6 @@ const TileData = () => {
     const games = useSelector((state: State) => state.steam.game);
 
     const columnCount = (width: number) => {
-        console.log('dfdsfsdf')
         if(games) {
             if (games.length === 1 || games.length === 2) {
                 return 1
@@ -75,20 +74,22 @@ const TileData = () => {
         const timeSinceLastCall = now - lastCall;
         const minimumInterval = 750;
 
-        if (scrollTop > (rowHeight(width) * games.length) / columnCount(Number(width)) / 1.20 && timeSinceLastCall >= minimumInterval) {
+        if(games) {
+            if (scrollTop > (rowHeight(width) * games.length) / columnCount(Number(width)) / 1.20 && timeSinceLastCall >= minimumInterval) {
 
-            const split = url.split('?')
-            let page = Number(split[0][split[0].length -1]) + 1
-            let newUrl = split[0].slice(0, -1) + page + '?' + split[1];
+                const split = url.split('?')
+                let page = Number(split[0][split[0].length - 1]) + 1
+                let newUrl = split[0].slice(0, -1) + page + '?' + split[1];
 
-            dispatch(changeUrl(newUrl))
-            fetch(newUrl)
-                .then(response => response.json())
-                .then(response => {
-                    dispatch(loadGames([response.results, searchPage +1]));
-                })
-                .catch(error => alert("Erreur : " + error));
-            setLastCall(now);
+                dispatch(changeUrl(newUrl))
+                fetch(newUrl)
+                    .then(response => response.json())
+                    .then(response => {
+                        dispatch(loadGames([response.results, searchPage + 1]));
+                    })
+                    .catch(error => alert("Erreur : " + error));
+                setLastCall(now);
+            }
         }
     }
 

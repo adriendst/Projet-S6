@@ -67,6 +67,7 @@ const SearchPage = () => {
                         }
                     } else {
                         if(!isNaN(filtersRecord[filtersKey]))
+                            console.log('coucouc')
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
                     }
                 }

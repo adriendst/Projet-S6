@@ -12,7 +12,10 @@ export interface Filter {
     required_age: number | undefined,
     categories: string[],
     genres: string[],
-    steamspy: string[]
+    steamspy: string[],
+    order_by : string | undefined,
+    order_type : string | undefined,
+    and_platforms : string | undefined
 }
 
 export interface Game {
@@ -47,89 +50,8 @@ export interface Steam {
     genres: [],
     steamspy: [],
     searchPage: number,
-    url : string
-}
-
-
-function getListeDeveloppeurs(data: Array<any>) {
-    let listeDeveloppeurs: Array<string> = [];
-
-    for (let i = 0; i < data.length; i++) {
-        let developpeur = data[i].developer;
-        if (!listeDeveloppeurs.includes(developpeur)) {
-            listeDeveloppeurs.push(developpeur);
-        }
-    }
-
-    return listeDeveloppeurs;
-}
-
-function getListePublishers(data: Array<any>) {
-    let publishersList: Array<string> = [];
-
-    for (let i = 0; i < data.length; i++) {
-        let publisher = data[i].publisher;
-        if (!publishersList.includes(publisher)) {
-            publishersList.push(publisher);
-        }
-    }
-
-    return publishersList;
-}
-
-function getListePlatforms(data: Array<any>) {
-    let platformsList: Array<string> = [];
-    for (let i = 0; i < data.length; i++) {
-        const platforms = data[i].platforms
-        for (let j = 0; j < platforms.length; j++) {
-            if (!platformsList.includes(platforms[j])) {
-                platformsList.push(platforms[j])
-            }
-        }
-    }
-
-    return platformsList;
-}
-
-function getListeCategories(data: Array<any>) {
-    let platformsList: Array<string> = [];
-    for (let i = 0; i < data.length; i++) {
-        const platforms = data[i].categories
-        for (let j = 0; j < platforms.length; j++) {
-            if (!platformsList.includes(platforms[j])) {
-                platformsList.push(platforms[j])
-            }
-        }
-    }
-
-    return platformsList;
-}
-
-function getListGenres() {
-    let list: Array<string> = ['coucou'];
-    fetch("http://localhost:9090/v1/genre/all")
-        .then(response => response.json())
-        .then(response => {
-            list = list.concat(response);
-            console.log(list);
-            return list;
-        })
-        .catch(error => alert("Erreur : " + error));
-
-}
-
-function getListSteamSpy(data: Array<any>) {
-    let platformsList: Array<string> = [];
-    for (let i = 0; i < data.length; i++) {
-        const platforms = data[i].steamspy
-        for (let j = 0; j < platforms.length; j++) {
-            if (!platformsList.includes(platforms[j])) {
-                platformsList.push(platforms[j])
-            }
-        }
-    }
-
-    return platformsList;
+    url : string,
+    refreshToken : string | undefined
 }
 
 
@@ -147,18 +69,22 @@ export const Slice = createSlice({
             required_age: undefined,
             categories: [],
             genres: [],
-            steamspy: []
+            steamspy: [],
+            order_by : undefined,
+            order_type: undefined,
+            and_platforms : undefined
         },
         displayType: false,
         game: [],
-        developers: getListeDeveloppeurs(data),
-        publishers: getListePublishers(data),
+        developers: [],
+        publishers: [],
         platforms: ['windows','linux', 'mac'],
         categories: [],
         genres: [],
-        steamspy: getListSteamSpy(data),
+        steamspy: [],
         searchPage: 2,
-        url : 'http://localhost:9090/v1/game/filter/1?'
+        url : 'http://localhost:9090/v1/game/filter/1?',
+        refreshToken : undefined
     },
     reducers: {
         changeDisplayType: (state: { displayType: boolean }) => {
@@ -191,6 +117,9 @@ export const Slice = createSlice({
         },
         changeUrl : (state : {url : string}, action : {payload : string})=> {
             state.url = action.payload
+        },
+        userConnection : (state : {refreshToken : string | undefined}, action : {payload : string | undefined}) => {
+            state.refreshToken = action.payload
         }
     },
 });
@@ -204,7 +133,8 @@ export const {
     loadGames,
     loadGenres,
     loadCategories,
-    changeUrl
+    changeUrl,
+    userConnection
 } = Slice.actions;
 
 export default Slice.reducer;
