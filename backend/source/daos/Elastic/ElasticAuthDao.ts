@@ -1,7 +1,7 @@
 import { ElasticBaseDao } from './ElasticConnector';
 import AuthDao from '../AuthDao';
 import { ILogin, IRegister, User } from '../../interfaces/auth';
-
+import { IToken, ITokenData } from '../../interfaces/jwt';
 const NAMESPACE = 'AUTH_DAO';
 
 const ElasticAuthDao: AuthDao = {
@@ -45,6 +45,16 @@ const ElasticAuthDao: AuthDao = {
         });
         return body.result === 'created';
     },
+
+    findToken: async function (tokenData: { userId: string; token: string; userAgent: string }): Promise<IToken | null> {
+        const token = await ElasticBaseDao.tokens.findOne({
+          userId: tokenData.userId,
+          refreshToken: tokenData.token,
+          userAgent: tokenData.userAgent,
+        });
+      
+        return token || null;
+      }
 };
 
 export default ElasticAuthDao;
