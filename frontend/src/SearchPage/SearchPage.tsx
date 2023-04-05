@@ -23,19 +23,21 @@ const SearchPage = () => {
 
     const games = useSelector((state: State) => state.steam.game);
     useEffect(() => {
-        if (games.length === 0) {
-            fetch("http://localhost:9090/v1/genre/all")
-                .then(response => response.json())
-                .then(response => {
-                    dispatch(loadGenres(response));
-                })
-                .catch(error => alert("Erreur : " + error));
-            fetch("http://localhost:9090/v1/category/all")
-                .then(response => response.json())
-                .then(response => {
-                    dispatch(loadCategories(response));
-                })
-                .catch(error => alert("Erreur : " + error));
+        if(games) {
+            if (games.length === 0) {
+                fetch("http://localhost:9090/v1/genre/all")
+                    .then(response => response.json())
+                    .then(response => {
+                        dispatch(loadGenres(response));
+                    })
+                    .catch(error => alert("Erreur : " + error));
+                fetch("http://localhost:9090/v1/category/all")
+                    .then(response => response.json())
+                    .then(response => {
+                        dispatch(loadCategories(response));
+                    })
+                    .catch(error => alert("Erreur : " + error));
+            }
         }
     }, []);
 
@@ -47,7 +49,7 @@ const SearchPage = () => {
         // console.log(filtersRecord)
         for (let filtersKey in filters) {
             if (typeof filtersRecord[filtersKey] !== "boolean") {
-                if (filtersRecord[filtersKey] !== undefined && filtersRecord[filtersKey].length !== 0) {
+                if (filtersRecord[filtersKey] !== undefined && filtersRecord[filtersKey].length !== 0 && filtersRecord[filtersKey] !== null) {
                     if (typeof filtersRecord[filtersKey] === 'object') {
                         if (filtersKey === 'release_date') {
                             if (filtersRecord[filtersKey][0]) {
@@ -61,15 +63,17 @@ const SearchPage = () => {
                             for (let i = 0; i < filtersRecord[filtersKey].length; i++) {
                                 test = test + `&${filtersKey}=${filtersRecord[filtersKey][i]}`
                             }
+                        // &start_date=1999-01-01&end_date=2022-12-31
                         }
                     } else {
+                        if(!isNaN(filtersRecord[filtersKey]))
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
                     }
                 }
             }
         }
-
         dispatch(changeUrl(test))
+
         console.log(test)
 
         fetch(test)

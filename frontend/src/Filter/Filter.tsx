@@ -108,6 +108,9 @@ const Filter = () => {
             }
         }
         setDate(datejs)
+        const newFilters = {...filters, release_date: date, dateByYear : !byYear};
+        dispatch(updateFilters(newFilters))
+        // console.log(byYear)
         // console.log(filters.release_date)
         // const newFilters = {...filters, release_date: [dateString]};
         // dispatch(updateFilters(newFilters))
@@ -176,7 +179,7 @@ const Filter = () => {
                             <div>
                                 {
                                     byYear && byRange ? <RangePicker
-                                        // onChange={onRangeDat eChange}
+                                        onChange={onRangeDateChange}
                                         picker={'year'} defaultValue={date as RangeValue<Dayjs>}
                                     /> : byYear && !byRange ?
                                         <DatePicker picker={'year'} onChange={onDateChange} defaultValue={date ? date[0] : undefined}

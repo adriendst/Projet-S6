@@ -18,8 +18,11 @@ const TileData = () => {
     const games = useSelector((state: State) => state.steam.game);
 
     const columnCount = (width: number) => {
-        if (games.length === 1 || games.length === 2) {
-            return 1
+        console.log('dfdsfsdf')
+        if(games) {
+            if (games.length === 1 || games.length === 2) {
+                return 1
+            }
         }
         if (width < 1200) {
             if (width < 600) {
@@ -56,7 +59,10 @@ const TileData = () => {
     }
 
     const rowCount = (width: number) => {
-        return games.length / columnCount(Number(width))
+        if(games) {
+            return games.length / columnCount(Number(width))
+        }
+        return 0
     }
 
     const [lastCall, setLastCall] = useState(0);
