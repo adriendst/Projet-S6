@@ -1,5 +1,7 @@
-export interface GenreDao {
-    getAll(): Promise<Array<string>>;
+import { GetAllGenresResponseBody } from '@steam-wiki/types';
+
+interface GenreDao {
+    getAll(): Promise<GetAllGenresResponseBody>;
 }
 
 export default GenreDao;

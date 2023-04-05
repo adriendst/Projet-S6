@@ -32,3 +32,11 @@ npm run dev
 ```
 
 to start the development server: If the server started successfully, the documentation for the API should be accessible under: http://localhost:9090/doc
+
+## Types package
+
+### Check the current version:
+
+```sh
+npm list @steam-wiki/types
+```

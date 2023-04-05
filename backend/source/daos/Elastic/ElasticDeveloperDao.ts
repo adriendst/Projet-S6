@@ -1,11 +1,10 @@
-import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
+import logging from '../../config/logging';
 import DEFAULTS from '../../config/defaults';
 import { HTTP_STATUS } from '../../config/http_status';
-import logging from '../../config/logging';
-import { CompletionParameters } from '../../interfaces/dao/parameters';
-import { Game } from '../../interfaces/game';
 import DeveloperDao from '../DeveloperDao';
+import { CompleteDevelopersResponseBody, CompletionParameters, Game } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
+import { QueryContainer, TermsAggregation } from '@elastic/elasticsearch/api/types';
 
 const indexName = 'games';
 const NAMESPACE = 'DEVELOPER_DAO';
@@ -13,15 +12,13 @@ const NAMESPACE = 'DEVELOPER_DAO';
 const ElasticDeveloperDao: DeveloperDao = {
     ...ElasticBaseDao,
 
-    completeName(params: CompletionParameters): Promise<any> {
-        return new Promise(async (resolve, reject) => {
+    completeName(params: CompletionParameters): Promise<CompleteDevelopersResponseBody> {
+        return new Promise<CompleteDevelopersResponseBody>(async (resolve, reject) => {
             try {
-                logging.info(NAMESPACE, 'completeDeveloper', params);
-
                 const maxResultSize = params.results ?? DEFAULTS.autocompletion_results;
 
                 let query: QueryContainer | undefined = undefined;
-                let sort: Sort = [];
+                let order: TermsAggregation['order'] | undefined = undefined;
                 if (params.searchText !== undefined && params.searchText.length !== 0) {
                     query = {
                         bool: {
@@ -49,10 +46,11 @@ const ElasticDeveloperDao: DeveloperDao = {
                             minimum_should_match: 1,
                         },
                     };
-                } else {
-                    sort.push({
-                        developer: { order: 'desc' },
-                    });
+                }
+                if (params.searchText === undefined || params.searchText.length < 2) {
+                    order = {
+                        _key: 'asc',
+                    };
                 }
 
                 const { body } = await ElasticConnector.instance.client.search<Game>({
@@ -65,6 +63,7 @@ const ElasticDeveloperDao: DeveloperDao = {
                                 terms: {
                                     field: 'developer',
                                     size: maxResultSize,
+                                    order,
                                 },
                             },
                         },

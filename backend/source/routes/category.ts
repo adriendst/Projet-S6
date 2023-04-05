@@ -21,7 +21,7 @@ const categoryDao: CategoryDao = Daos.CategoryDao;
  *       422:
  *         description: The entered parameters do not correspond to the schema
  */
-router.get('/all', (req, res) => {
+router.get('/all', (_, res) => {
     categoryDao
         .getAll()
         .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))

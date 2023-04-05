@@ -1,11 +1,10 @@
-import { QueryContainer, Sort, SortContainer } from '@elastic/elasticsearch/api/types';
+import logging from '../../config/logging';
 import DEFAULTS from '../../config/defaults';
 import { HTTP_STATUS } from '../../config/http_status';
-import logging from '../../config/logging';
-import { CompletionParameters } from '../../interfaces/dao/parameters';
-import { Game } from '../../interfaces/game';
 import PublisherDao from '../PublisherDao';
+import { Game, CompletionParameters } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
+import { QueryContainer, TermsAggregation } from '@elastic/elasticsearch/api/types';
 
 const indexName = 'games';
 const NAMESPACE = 'PUBLISHER_DAO';
@@ -21,7 +20,7 @@ const ElasticPublisherDao: PublisherDao = {
                 const maxResultSize = params.results ?? DEFAULTS.autocompletion_results;
 
                 let query: QueryContainer | undefined = undefined;
-                let sort: Sort = [];
+                let order: TermsAggregation['order'] | undefined = undefined;
                 if (params.searchText !== undefined && params.searchText.length !== 0) {
                     query = {
                         bool: {
@@ -49,10 +48,11 @@ const ElasticPublisherDao: PublisherDao = {
                             minimum_should_match: 1,
                         },
                     };
-                } else {
-                    sort.push({
-                        publisher: { order: 'desc' },
-                    });
+                }
+                if (params.searchText === undefined || params.searchText.length < 2) {
+                    order = {
+                        _key: 'asc',
+                    };
                 }
 
                 const { body } = await ElasticConnector.instance.client.search<Game>({
@@ -65,6 +65,7 @@ const ElasticPublisherDao: PublisherDao = {
                                 terms: {
                                     field: 'publisher',
                                     size: maxResultSize,
+                                    order,
                                 },
                             },
                         },

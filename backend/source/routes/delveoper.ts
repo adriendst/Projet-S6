@@ -1,9 +1,8 @@
 import express from 'express';
-import DEFAULTS from '../config/defaults';
-import { HTTP_STATUS, HTTP_STATUS_CODE } from '../config/http_status';
+import { HTTP_STATUS_CODE } from '../config/http_status';
 import Daos from '../daos/Daos';
 import DeveloperDao from '../daos/DeveloperDao';
-import { CompletionParameters } from '../interfaces/dao/parameters';
+import { CompletionParameters } from '@steam-wiki/types';
 import CompletionSchemas from '../joi/completion';
 import { ValidateJoi, ValidateQueryJoi } from '../middleware/joi';
 

@@ -1,13 +1,12 @@
-import { CompletionParameters } from '../interfaces/dao/parameters';
-import { FilterParameters } from '../interfaces/filter';
+import { IdParameters, GetGameReponseBody, CompletionParameters, CompleteGameResponseBody, FilterParameters, FilterGamesResponseBody } from '@steam-wiki/types';
 import { BaseDao } from './Daos';
 
-export interface GameDao extends BaseDao {
-    completeName(params: CompletionParameters): Promise<Array<string>>;
+interface GameDao extends BaseDao {
+    completeName(params: CompletionParameters): Promise<CompleteGameResponseBody>;
 
-    getGameById(params: { id: string }): Promise<any>;
+    getGameById(params: IdParameters): Promise<GetGameReponseBody>;
 
-    filterGames(page: number, params: FilterParameters): Promise<any>;
+    filterGames(page: number, params: FilterParameters): Promise<FilterGamesResponseBody>;
 }
 
 export default GameDao;

@@ -1,8 +1,8 @@
-import { CompletionParameters } from '../interfaces/dao/parameters';
 import { BaseDao } from './Daos';
+import { CompletionParameters, CompleteDevelopersResponseBody } from '@steam-wiki/types';
 
-export interface DeveloperDao extends BaseDao {
-    completeName(params: CompletionParameters): Promise<Array<string>>;
+interface DeveloperDao extends BaseDao {
+    completeName(params: CompletionParameters): Promise<CompleteDevelopersResponseBody>;
 }
 
 export default DeveloperDao;
