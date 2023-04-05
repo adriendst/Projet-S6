@@ -3,6 +3,7 @@ import AuthDao from '../AuthDao';
 import { ILogin, IRegister, User } from '../../interfaces/auth';
 
 const NAMESPACE = 'AUTH_DAO';
+const indexName = 'user';
 
 const ElasticAuthDao: AuthDao = {
     ...ElasticBaseDao,
@@ -19,7 +20,7 @@ const ElasticAuthDao: AuthDao = {
 
     findByEmail: async function (email: string): Promise<User | undefined> {
         const { body } = await ElasticBaseDao.client.search({
-            index: 'user',
+            index: indexName,
             body: {
                 query: {
                     term: {
@@ -40,11 +41,18 @@ const ElasticAuthDao: AuthDao = {
 
     createUser: async function (user: IRegister) {
         const { body } = await ElasticBaseDao.client.index({
-            index: 'user',
+            index: indexName,
             body: user,
         });
         return body.result === 'created';
     },
+
+    // getById(userId: string): Promise<User> {
+    //     const { body } = await ElasticBaseDao.client.get({
+    //         index: index,
+    //         id: params.id,
+    //     })
+    // },
 };
 
 export default ElasticAuthDao;

@@ -5,8 +5,12 @@ import { FilterParameters } from '@steam-wiki/types';
 
 const Joi = JoiImport.extend(DateExtension) as typeof JoiImport;
 
-const fullDateSchema = Joi.date().format('YYYY-MM-DD').optional();
-const yearSchema = Joi.date().format('YYYY').optional();
+const fullDateSchema = Joi.string()
+    .pattern(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/)
+    .optional();
+const yearSchema = Joi.string()
+    .pattern(/^\d{4}$/)
+    .optional();
 const stringSchema = Joi.string().optional();
 const stringArraySchema = Joi.array().items(stringSchema).optional();
 const stringAlternativesSchema = Joi.alternatives().try(stringSchema, stringArraySchema);

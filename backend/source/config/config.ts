@@ -3,6 +3,20 @@ import packageInfo from '../../node_modules/@steam-wiki/types/package.json';
 
 dotenv.config();
 
+/*
+ * Environment configuration
+ */
+export enum MODES {
+    DEVELOPMENT,
+    DEBUG,
+    PRODUCTION,
+}
+
+const MODE = process.argv.includes('-dev') ? MODES.DEVELOPMENT : MODES.PRODUCTION;
+
+/*
+ * Genreal server configuration
+ */
 const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME || 'localhost';
 const SERVER_HTTP_PORT = process.env.SERVER_PORT || 9090;
 const SERVER_HTTPS_PORT = process.env.HTTPS_SERVER_PORT || 9091;
@@ -25,20 +39,18 @@ const SERVER = {
     api_version: API_VERSION,
 };
 
-const CORS = {
-    origin: ['http://localhost:5173', 'https://admin.salespotter.de'],
-    optionsSuccessStatus: 200,
-    methods: 'GET, PUT, POST, DELETE',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
+/*
+ * ElasticSearch configuration
+ */
 const ELASTIC_URL = process.env.ELASTIC_URL || 'http://localhost:9200';
 
 const ELASTIC = {
     url: ELASTIC_URL,
 };
 
+/*
+ * Authentication configuration
+ */
 const ACCESS_TOKEN_EXPIRATION = 30; // in min
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'ACCESSTOKENSECRET';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'REFRESHTOKENSECRET';
@@ -49,6 +61,9 @@ const AUTH = {
     refresh_token_secret: REFRESH_TOKEN_SECRET,
 };
 
+/*
+ * Types configuration
+ */
 const MIN_TYPES_PACKAGE_VERSION = {
     major: 1,
     minor: 0,
@@ -56,20 +71,24 @@ const MIN_TYPES_PACKAGE_VERSION = {
     string: '^1.0.7',
 };
 const USED_TYPES_PACKAGE_VERSION = packageInfo.version;
+const TYPES_HEADER_NAME = 'x-used-types-version';
 
 const TYPES = {
-    header_name: 'x-used-types-version',
+    header_name: TYPES_HEADER_NAME,
     min_version: MIN_TYPES_PACKAGE_VERSION,
     used_version: USED_TYPES_PACKAGE_VERSION,
 };
 
-export enum MODES {
-    DEVELOPMENT,
-    DEBUG,
-    PRODUCTION,
-}
-
-const MODE = process.argv.includes('-dev') ? MODES.DEVELOPMENT : MODES.PRODUCTION;
+/*
+ * CORE configuration
+ */
+const CORS = {
+    origin: ['http://localhost:3000'],
+    optionsSuccessStatus: 200,
+    methods: 'GET, PUT, POST, DELETE',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', TYPES_HEADER_NAME],
+};
 
 const config = {
     server: SERVER,
