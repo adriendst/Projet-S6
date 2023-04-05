@@ -131,7 +131,7 @@ const ElasticGameDao: GameDao = {
                     pageSize: PAGE_SIZE,
                     total: countReds.body.count,
                     totalPages: Math.ceil(countReds.body.count / PAGE_SIZE),
-                    results: resultRes.body.hits.hits.map((doc) => doc._source?.release_date),
+                    results: resultRes.body.hits.hits.map((doc) => doc._source),
                     filters,
                 };
 
