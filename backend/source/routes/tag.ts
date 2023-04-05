@@ -1,29 +1,28 @@
 import express from 'express';
 import { HTTP_STATUS_CODE } from '../config/http_status';
 import Daos from '../daos/Daos';
+import TagDao from '../daos/TagDao';
 
-import GenreDao from '../daos/GenreDao';
-
-const NAMESPACE = 'GENRE_ROUTE';
+const NAMESPACE = 'TAG_ROUTE';
 
 const router = express.Router();
 
-const genreDao: GenreDao = Daos.GenreDao;
+const tagDao: TagDao = Daos.TagDao;
 
 /**
  * @swagger
- * /v1/genre/all:
+ * /v1/tag/all:
  *   get:
- *     summary: Get all the genres
- *     tags: [Genre]
+ *     summary: Get all the tags
+ *     tags: [Tag]
  *     responses:
  *       200:
- *         description: Sucessfully retrived all genres
+ *         description: Sucessfully retrived all tags
  *       422:
  *         description: The entered parameters do not correspond to the schema
  */
 router.get('/all', (_, res) => {
-    genreDao
+    tagDao
         .getAll()
         .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))
         .catch((err) => res.status(err.code).json(err));
@@ -34,6 +33,6 @@ export = router;
 /**
  * @swagger
  * tags:
- *   name: Genre
- *   description: The genre managing API endpoint
+ *   name: Tag
+ *   description: The tag managing API endpoint
  */

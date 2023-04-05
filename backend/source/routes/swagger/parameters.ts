@@ -12,6 +12,15 @@
  *         default: 1
  *       description: The page to return.
  *
+ *     PathSearchTextParameter:
+ *       in: path
+ *       name: searchText
+ *       required: false
+ *       schema:
+ *         type: string
+ *       example: "Count"
+ *       description: The string to auto-complete
+ *
  *     SearchTextParameter:
  *       in: query
  *       name: searchText

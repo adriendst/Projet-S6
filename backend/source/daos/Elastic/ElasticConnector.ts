@@ -1,10 +1,15 @@
 import config from '../../config/config';
+import { HTTP_STATUS } from '../../config/http_status';
 import { BaseDao } from '../Daos';
 import { Client } from '@elastic/elasticsearch';
 import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
-import { HTTP_STATUS } from '../../config/http_status';
+
+const NAMESPACE = 'ELASTIC_CONNECTOR';
 
 class ElasticConnector {
+    static getClient() {
+        throw new Error('Method not implemented.');
+    }
     private esclient: TypedClient;
     private static _instance: ElasticConnector | undefined = undefined;
 

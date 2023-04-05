@@ -1,11 +1,11 @@
 # Steam-WIKI backend
 
-## Start the server
+## Start the server in development mode
 
 ```sh
 npm run dev
 ```
 
-## Swagger doc
+## Swagger documentation of the API
 
 http://localhost:9090/doc

@@ -1,6 +1,12 @@
 import fs from 'fs';
 import { parse } from 'csv-parse';
 
+/**
+ * Gives a list of all the values for specific fields
+ *
+ * @param fileName The file to check
+ * @param fields The fields for which to get all the possible values
+ */
 export const scanData = (fileName: string, fields: Array<string>) => {
     const arrayIndiciesMap: Map<string, number> = new Map();
     const fieldValuesMap: Map<string, Set<string>> = new Map();

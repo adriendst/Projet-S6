@@ -4,6 +4,7 @@ import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import csv from 'csv-parser';
 import { transformer } from './utils/transformer';
 import { GAME_MAPPINGS } from './schemas/games';
+// import { GAME_SETTINGS } from './schemas/games';
 import { DESCRIPTION_MAPPINGS } from './schemas/description';
 import { MEDIA_MAPPINGS } from './schemas/media';
 import { REQUIREMENTS_MAPPINGS } from './schemas/requirements';
@@ -23,6 +24,7 @@ const indices: Array<IIndex> = [
         name: 'games',
         file: 'steam.csv',
         mappings: GAME_MAPPINGS,
+        // settings: GAME_SETTINGS,
     },
     {
         name: 'description',
@@ -65,8 +67,8 @@ async function prepare(indexData: IIndex, deleteIfExists: boolean): Promise<bool
     await esclient.indices.create({
         index: indexData.name,
         body: {
-            mappings: indexData.mappings,
             settings: indexData.settings,
+            mappings: indexData.mappings,
         },
     });
     console.log(`Created index ${indexData.name}`);

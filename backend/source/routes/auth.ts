@@ -8,7 +8,9 @@ import logging from '../config/logging';
 import config from '../config/config';
 import Daos from '../daos/Daos';
 import UserSchemas from '../schemas/User';
-
+import { ILogin } from '../interfaces/auth';
+import { HTTP_STATUS, HTTP_STATUS_CODE } from '../config/http_status';
+import bcrypt from 'bcrypt';
 const NAMESPACE = 'AUTH-ROUTE';
 
 const router = express.Router();
@@ -29,33 +31,42 @@ const authDao: AuthDao = Daos.AuthDao;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Login'
+ *             $ref: '#/components/schemas/LoginRequestBody'
  *     responses:
  *       200:
  *         description: Sucessfully logged in
  *       401:
  *         description: Invalid login information
  *       422:
- *         description: The entered parameters do not correspond to the schema
+ *         description: The body does not correspond to the required body schema
  */
 router.post('/login', ValidateJoi(UserSchemas.login), async (req, res) => {
-    // const body = req.body as ILogin;
-    // authDao
-    //     .loginUser(body)
-    //     .then(async (response) => {
-    //         if (response.code !== StatusCode.Ok) return res.status(response.code).json({ message: response.message });
-    //         const userAgent = req.headers['user-agent'];
-    //         if (!userAgent) return res.status(StatusCode.Unauthorized).json({ message: 'You dont have a user-agent' });
-    //         const accessToken = generateAccessToken(response.data);
-    //         const refreshToken = generateRefreshToken(response.data.userId, userAgent);
-    //         const insertRes = await authDao.insertToken({ userId: response.data.userId, token: refreshToken, userAgent });
-    //         //res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
-    //         res.status(response.code).json(insertRes.code < 300 ? { accessToken, refreshToken, expiration: config.auth.access_token_expiration } : { message: insertRes.message });
-    //     })
-    //     .catch((err) => {
-    //         logging.error(NAMESPACE, err);
-    //         res.status(StatusCode.InternaleServerError).json(err);
-    //     });
+    try {
+        const { email, password } = req.body as ILogin;
+        const userAgent = req.headers['user-agent']!;
+        const user = await authDao.findByEmail(email);
+        if (!user) {
+            return res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Invalid credentials' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        if (!isPasswordValid) {
+            return res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Invalid credentials' });
+        }
+
+        const userId = user.id;
+        const accessToken = generateAccessToken({ userId });
+        const refreshToken = generateRefreshToken(userId, userAgent);
+
+        // Enregistrement du jeton de rafraîchissement en base de données
+        // await authDao.insertToken({ userId, token: refreshToken, userAgent: userAgent });
+
+        // Renvoi du jeton d'accès et du jeton de rafraîchissement au client
+        res.status(200).json({ accessToken, refreshToken });
+    } catch (error) {
+        logging.error(NAMESPACE, 'login', error);
+        res.status(HTTP_STATUS_CODE.InternaleServerError).json({ message: HTTP_STATUS.InternaleServerError });
+    }
 });
 
 const getTokenData = (token: string) => {
@@ -72,7 +83,7 @@ const generateAccessToken = (data: ITokenData) => {
     return jwt.sign(data, config.auth.access_token_secret, { expiresIn: config.auth.access_token_expiration + 'min' });
 };
 
-const generateRefreshToken = (userId: number, userAgent: string | undefined) => {
+const generateRefreshToken = (userId: string, userAgent: string | undefined) => {
     return jwt.sign({ userId, userAgent }, config.auth.refresh_token_secret);
 };
 
@@ -86,7 +97,11 @@ export = router;
  *
  * components:
  *   schemas:
- *     Login:
+ *     LoginRequestBody:
+ *       allOf:
+ *         - $ref: '#/components/schemas/UserData'
+ *
+ *     UserData:
  *       type: object
  *       required:
  *         - email

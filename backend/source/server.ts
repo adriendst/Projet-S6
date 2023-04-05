@@ -12,13 +12,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { exit } from 'process';
 import { HTTP_STATUS, HTTP_STATUS_CODE } from './config/http_status';
+import { ValidateTypesVersion } from './middleware/types';
 
 import authRoutes from './routes/auth';
+import registerRoutes from './routes/register';
 import gameRoutes from './routes/game';
 import developerRoutes from './routes/delveoper';
 import publisherRoutes from './routes/publisher';
 import categoryRoutes from './routes/category';
 import genreRoutes from './routes/genre';
+import tagRoutes from './routes/tag';
 
 const NAMESPACE = 'Server';
 const isProdMode = config.mode === MODES.PRODUCTION;
@@ -35,17 +38,14 @@ if (isProdMode) {
     app.enable('trust proxy');
     app.use((req, res, next) => {
         if (!req.secure) {
-            return res.redirect(`https://${config.server.hostname}:${config.server.https_port}${req.url}`);
+            res.redirect(`https://${config.server.hostname}:${config.server.https_port}${req.url}`);
+            return;
         }
         next();
     });
 
     app.use((req, res, next) => {
-        if (!req.headers?.['user-agent']) {
-            res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
-            return;
-        }
-        if (!req.headers['user-agent'].startsWith('Mozilla')) {
+        if (req.headers['user-agent'] === undefined || !req.headers['user-agent'].startsWith('Mozilla')) {
             res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Its seems that you are not using a browser...' });
             return;
         }
@@ -60,7 +60,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/uploads', express.static('uploads'));
+// app.use(ValidateTypesVersion);
 
 /** Log the request */
 app.use((req, res, next) => {
@@ -77,11 +77,13 @@ app.use((req, res, next) => {
 
 /** Routes go here */
 app.use(`/${config.server.api_version}/auth`, authRoutes);
+app.use(`/${config.server.api_version}/auth/register`, registerRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
 app.use(`/${config.server.api_version}/developer`, developerRoutes);
 app.use(`/${config.server.api_version}/publisher`, publisherRoutes);
 app.use(`/${config.server.api_version}/category`, categoryRoutes);
 app.use(`/${config.server.api_version}/genre`, genreRoutes);
+app.use(`/${config.server.api_version}/tag`, tagRoutes);
 
 /** Error handling */
 app.use((_req, res, _next) => {

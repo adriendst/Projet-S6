@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import packageInfo from '../../node_modules/@steam-wiki/types/package.json';
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ const SERVER = {
     certificate: SERVER_CERTIFICATE,
     url: SERVER_URL,
     api_url: API_URL,
-    api_version: API_VERSION
+    api_version: API_VERSION,
 };
 
 const CORS = {
@@ -29,13 +30,13 @@ const CORS = {
     optionsSuccessStatus: 200,
     methods: 'GET, PUT, POST, DELETE',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 const ELASTIC_URL = process.env.ELASTIC_URL || 'http://localhost:9200';
 
 const ELASTIC = {
-    url: ELASTIC_URL
+    url: ELASTIC_URL,
 };
 
 const ACCESS_TOKEN_EXPIRATION = 30; // in min
@@ -45,22 +46,38 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'REFRESHTOKENSE
 const AUTH = {
     access_token_expiration: ACCESS_TOKEN_EXPIRATION,
     access_token_secret: ACCESS_TOKEN_SECRET,
-    refresh_token_secret: REFRESH_TOKEN_SECRET
+    refresh_token_secret: REFRESH_TOKEN_SECRET,
+};
+
+const MIN_TYPES_PACKAGE_VERSION = {
+    major: 1,
+    minor: 0,
+    patch: 0,
+    string: '^1.0.7',
+};
+const USED_TYPES_PACKAGE_VERSION = packageInfo.version;
+
+const TYPES = {
+    header_name: 'x-used-types-version',
+    min_version: MIN_TYPES_PACKAGE_VERSION,
+    used_version: USED_TYPES_PACKAGE_VERSION,
 };
 
 export enum MODES {
     DEVELOPMENT,
-    PRODUCTION
+    DEBUG,
+    PRODUCTION,
 }
 
-const MODE = process.argv[2] === '-dev' ? MODES.DEVELOPMENT : MODES.PRODUCTION;
+const MODE = process.argv.includes('-dev') ? MODES.DEVELOPMENT : MODES.PRODUCTION;
 
 const config = {
     server: SERVER,
     auth: AUTH,
     cors: CORS,
     mode: MODE,
-    elastic: ELASTIC
+    elastic: ELASTIC,
+    types: TYPES,
 };
 
 export default config;

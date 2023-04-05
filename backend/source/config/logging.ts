@@ -1,4 +1,5 @@
 import util from 'util';
+import config, { MODES } from './config';
 
 const log = ({ message, namespace = 'SERVER', object, type = 'INFO' }: { namespace: string; message: string; object?: any; type: string }) => {
     if (object) {
@@ -9,21 +10,25 @@ const log = ({ message, namespace = 'SERVER', object, type = 'INFO' }: { namespa
 };
 
 const info = (namespace: string, message: string, object?: any) => {
-    log({
-        namespace,
-        message,
-        object,
-        type: 'INFO',
-    });
+    if (config.mode === MODES.DEVELOPMENT) {
+        log({
+            namespace,
+            message,
+            object,
+            type: 'INFO',
+        });
+    }
 };
 
 const warn = (namespace: string, message: string, object?: any) => {
-    log({
-        namespace,
-        message,
-        object,
-        type: 'WARN',
-    });
+    if (config.mode === MODES.DEVELOPMENT) {
+        log({
+            namespace,
+            message,
+            object,
+            type: 'WARN',
+        });
+    }
 };
 
 const error = (namespace: string, message: string, object?: any) => {
@@ -36,12 +41,14 @@ const error = (namespace: string, message: string, object?: any) => {
 };
 
 const debug = (namespace: string, message: string, object?: any) => {
-    log({
-        namespace,
-        message,
-        object,
-        type: 'DEBUG',
-    });
+    if (config.mode === MODES.DEBUG) {
+        log({
+            namespace,
+            message,
+            object,
+            type: 'DEBUG',
+        });
+    }
 };
 
 const getTimeStamp = (): string => {

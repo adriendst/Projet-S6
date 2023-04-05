@@ -1,27 +1,26 @@
 import logging from '../../config/logging';
 import { HTTP_STATUS } from '../../config/http_status';
-import { Game } from '@steam-wiki/types';
-import GenreDao from '../GenreDao';
+import TagDao from '../TagDao';
+import { Game, GetAllTagsResponseBody } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 
-const indexName = 'games';
-const NAMESPACE = 'GENRE_DAO';
+const NAMESPACE = 'TAG_DAO';
 
-const ElasticGenreDao: GenreDao = {
+const ElasticTagDao: TagDao = {
     ...ElasticBaseDao,
 
-    getAll(): Promise<any> {
-        return new Promise(async (resolve, reject) => {
+    getAll(): Promise<GetAllTagsResponseBody> {
+        return new Promise<GetAllTagsResponseBody>(async (resolve, reject) => {
             try {
                 const { body } = await ElasticConnector.instance.client.search<Game>({
-                    index: indexName,
+                    index: 'games',
                     body: {
                         size: 0,
                         aggs: {
                             unique_values: {
                                 terms: {
-                                    field: 'genres.keyword',
-                                    size: 100,
+                                    field: 'steamspy_tags.keyword',
+                                    size: 250,
                                 },
                             },
                         },
@@ -29,8 +28,8 @@ const ElasticGenreDao: GenreDao = {
                 });
 
                 // @ts-ignore
-                const genres = body.aggregations!.unique_values.buckets.map((values: { key: string }) => values.key).sort((a, b) => a.localeCompare(b));
-                resolve(genres);
+                const tags = body.aggregations!.unique_values.buckets.map((values: { key: string }) => values.key).sort((a, b) => a.localeCompare(b));
+                resolve({ results: tags });
             } catch (error) {
                 logging.error(NAMESPACE, 'getAll', error);
                 reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
@@ -39,4 +38,4 @@ const ElasticGenreDao: GenreDao = {
     },
 };
 
-export default ElasticGenreDao;
+export default ElasticTagDao;

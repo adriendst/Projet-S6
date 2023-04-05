@@ -9,16 +9,16 @@ export const GAME_MAPPINGS: TypeMapping = {
         name: {
             type: 'text',
             fields: {
-                // autocomplete: {
-                //     type: 'search_as_you_type',
-                // },
+                fuzzy: {
+                    type: 'text',
+                    analyzer: 'stop',
+                },
+                autocomplete: {
+                    type: 'search_as_you_type',
+                },
                 // completion: {
                 //     type: 'completion',
                 // },
-                fuzzy: {
-                    type: 'text',
-                    analyzer: 'standard',
-                },
                 // keyword: {
                 //     type: 'keyword',
                 // },
