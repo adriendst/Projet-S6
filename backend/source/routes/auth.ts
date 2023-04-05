@@ -59,7 +59,7 @@ router.post('/login', ValidateJoi(UserSchemas.login), async (req, res) => {
         const refreshToken = generateRefreshToken(userId, userAgent);
 
         //Enregistrement du jeton de rafraîchissement en base de données
-        await authDao.insertToken({ userId, token: refreshToken, userAgent: userAgent });
+        // await authDao.insertToken({ userId, token: refreshToken, userAgent: userAgent });
 
         // Renvoi du jeton d'accès et du jeton de rafraîchissement au client
         res.status(200).json({ accessToken, refreshToken });

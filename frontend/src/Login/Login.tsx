@@ -18,12 +18,13 @@ const Login = () => {
         axios.post('http://localhost:9090/v1/auth/login', {'email': values.email, 'password': values.password})
             .then((response: AxiosResponse<any, any>) => {
                 console.log(response);
-                localStorage.setItem('accessToken', response.data.accessToken);
                 localStorage.setItem('refreshToken', response.data.refreshToken);
-                dispatch(userConnection(response.data.refreshToken))
+                dispatch(userConnection(response.data.refreshToken));
+                // axios.defaults.baseURL = 'http://localhost:9090/v1';
+                axios.defaults.headers.common['authorization'] = `Bearer ${response.data.refreshToken}`
+
             });
         navigate( '/');
-
     };
 
     const onFinishFailed = (errorInfo: any) => {
