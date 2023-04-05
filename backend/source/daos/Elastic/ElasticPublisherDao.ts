@@ -5,6 +5,7 @@ import PublisherDao from '../PublisherDao';
 import { Game, CompletionParameters } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import { QueryContainer, TermsAggregation } from '@elastic/elasticsearch/api/types';
+import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
 const NAMESPACE = 'PUBLISHER_DAO';
@@ -85,8 +86,7 @@ const ElasticPublisherDao: PublisherDao = {
                     results: uniquePublishers,
                 });
             } catch (error) {
-                logging.error(NAMESPACE, 'completeName', error);
-                reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },

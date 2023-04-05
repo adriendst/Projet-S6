@@ -3,6 +3,7 @@ import { HTTP_STATUS } from '../../config/http_status';
 import { Game, GetAllCategoriesResponseBody } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import CategoryDao from '../CategoryDao';
+import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
 const NAMESPACE = 'CATEGORY_DAO';
@@ -32,8 +33,7 @@ const ElasticCategoryDao: CategoryDao = {
                 const categories = body.aggregations!.unique_values.buckets.map((values: { key: string }) => values.key).sort((a, b) => a.localeCompare(b));
                 resolve(categories);
             } catch (error) {
-                logging.error(NAMESPACE, 'getAll', error);
-                reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },

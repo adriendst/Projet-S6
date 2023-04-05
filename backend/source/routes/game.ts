@@ -7,12 +7,15 @@ import { ValidateParamsJoi, ValidateQueryJoi } from '../middleware/joi';
 import CompletionSchemas from '../joi/completion';
 import QuerySchemas from '../joi/query';
 import FilterSchemas from '../schemas/Filter';
+import { AuthernticateToken } from '../middleware/auth';
+import UserDao from '../daos/UserDao';
 
 const NAMESPACE = 'GAME-ROUTE';
 
 const router = express.Router();
 
 const gameDao: GameDao = Daos.GameDao;
+const userDao: UserDao = Daos.UserDao;
 
 /**
  * @swagger
@@ -34,6 +37,41 @@ router.get('/complete', ValidateQueryJoi(CompletionSchemas.default), (req, res) 
 
     gameDao
         .completeName(query)
+        .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))
+        .catch((err) => res.status(err.code).json(err));
+});
+
+/**
+ * @swagger
+ * /v1/game/toggle/{id}:
+ *   get:
+ *     summary: Get autocompletions for a string
+ *     tags: [Game]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 10
+ *         description: The id of the game to toggle in the library
+ *     responses:
+ *       200:
+ *         description: Sucessfully added to the library
+ *       204:
+ *         description: Sucessfully deleted from the library
+ *       401:
+ *         description: The user is not authorized to perform this action
+ *       422:
+ *         description: The entered parameters do not correspond to the schema
+ */
+router.get('/toggle/:id', ValidateParamsJoi(QuerySchemas.numberId), AuthernticateToken, (req, res) => {
+    const params = req.params as unknown as { id: string };
+
+    userDao
+        .toggleLibraryGame(req.tokenData!.userId, params.id)
         .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))
         .catch((err) => res.status(err.code).json(err));
 });

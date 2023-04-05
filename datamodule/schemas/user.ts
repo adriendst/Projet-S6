@@ -14,7 +14,13 @@ export const USER_MAPPINGS: TypeMapping = {
             index: false,
         },
         games: {
-            type: 'keyword',
+            type: 'text',
+            fields: {
+                keyword: {
+                    type: 'keyword',
+                },
+            },
+            index: false,
         },
         last_login: {
             type: 'date',

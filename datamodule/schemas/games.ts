@@ -16,11 +16,11 @@ export const GAME_MAPPINGS: TypeMapping = {
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
+                keyword: {
+                    type: 'keyword',
+                },
                 // completion: {
                 //     type: 'completion',
-                // },
-                // keyword: {
-                //     type: 'keyword',
                 // },
             },
         },

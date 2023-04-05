@@ -1,8 +1,7 @@
-import logging from '../../config/logging';
-import { HTTP_STATUS } from '../../config/http_status';
 import TagDao from '../TagDao';
 import { Game, GetAllTagsResponseBody } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
+import { DaoErrorHandler } from './utils/error_handler';
 
 const NAMESPACE = 'TAG_DAO';
 
@@ -31,8 +30,7 @@ const ElasticTagDao: TagDao = {
                 const tags = body.aggregations!.unique_values.buckets.map((values: { key: string }) => values.key).sort((a, b) => a.localeCompare(b));
                 resolve({ results: tags });
             } catch (error) {
-                logging.error(NAMESPACE, 'getAll', error);
-                reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },

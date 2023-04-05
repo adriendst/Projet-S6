@@ -5,6 +5,7 @@ import DeveloperDao from '../DeveloperDao';
 import { CompleteDevelopersResponseBody, CompletionParameters, Game } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import { QueryContainer, TermsAggregation } from '@elastic/elasticsearch/api/types';
+import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
 const NAMESPACE = 'DEVELOPER_DAO';
@@ -83,8 +84,7 @@ const ElasticDeveloperDao: DeveloperDao = {
                     results: uniqueDevelopers,
                 });
             } catch (error) {
-                logging.error(NAMESPACE, 'completeName', error);
-                reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },

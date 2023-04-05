@@ -29,6 +29,7 @@ const ElasticAuthDao: AuthDao = {
                 },
             },
         });
+        console.log(body);
         if (body.hits.hits.length === 0) {
             return undefined;
         }
@@ -42,20 +43,20 @@ const ElasticAuthDao: AuthDao = {
     createUser: async function (user: IRegister) {
         const { body } = await ElasticBaseDao.client.index({
             index: indexName,
-            body: user,
+            body: { ...user, games: [] },
         });
         return body.result === 'created';
     },
 
     findToken: async function (tokenData: { userId: string; token: string; userAgent: string }): Promise<IToken | null> {
         const token = await ElasticBaseDao.tokens.findOne({
-          userId: tokenData.userId,
-          refreshToken: tokenData.token,
-          userAgent: tokenData.userAgent,
+            userId: tokenData.userId,
+            refreshToken: tokenData.token,
+            userAgent: tokenData.userAgent,
         });
-      
+
         return token || null;
-      }
+    },
 };
 
 export default ElasticAuthDao;

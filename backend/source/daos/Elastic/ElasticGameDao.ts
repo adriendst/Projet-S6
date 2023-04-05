@@ -6,7 +6,8 @@ import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
 import { addAgeFilter, addCategoryFilter, addDateFilter, addDeveloperFilter, addGenreFilter, addNameFilter, addPlatformFilter, addPublisherFilter, getFuzzyFilter } from './utils/filters';
-import { HTTP_STATUS } from '../../config/http_status';
+import { HTTP_STATUS, HTTP_STATUS_CODE } from '../../config/http_status';
+import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
 const NAMESPACE = 'GAME_DAO';
@@ -51,8 +52,7 @@ const ElasticGameDao: GameDao = {
                 };
                 resolve(response);
             } catch (error) {
-                logging.error(NAMESPACE, 'completeName', error);
-                reject({ code: 500, message: 'An unexpected error occured', cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },
@@ -61,9 +61,13 @@ const ElasticGameDao: GameDao = {
         return new Promise<GetGameReponseBody>(async (resolve, reject) => {
             try {
                 logging.info(NAMESPACE, 'getGameById', params);
-                const indicies = [indexName, 'description', 'media', 'support', 'requirements'];
-                const results = await Promise.all(
-                    indicies.map((index) =>
+                const indicies = ['description', 'media', 'support', 'requirements'];
+                const results = await Promise.all([
+                    ElasticConnector.instance.client.get({
+                        index: indexName,
+                        id: params.id,
+                    }),
+                    ...indicies.map((index) =>
                         ElasticConnector.instance.client
                             .get({
                                 index: index,
@@ -71,16 +75,11 @@ const ElasticGameDao: GameDao = {
                             })
                             .catch(() => null),
                     ),
-                );
+                ]);
                 const game = results.reduce((acc, result) => (result !== null && result.body._source ? { ...acc, ...result.body._source } : acc), {});
                 resolve({ game });
             } catch (error) {
-                if (error instanceof ResponseError) {
-                    console.log(NAMESPACE, 'RequestAbortedError', error);
-                    reject({ code: error.statusCode, message: error.message, cause: error });
-                } else {
-                    reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
-                }
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },
@@ -137,7 +136,7 @@ const ElasticGameDao: GameDao = {
 
                 resolve(response);
             } catch (error) {
-                reject({ ...HTTP_STATUS.InternaleServerError, cause: error });
+                DaoErrorHandler(error, reject, NAMESPACE);
             }
         });
     },

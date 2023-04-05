@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import AuthDao from '../daos/AuthDao';
 import { ValidateJoi } from '../middleware/joi';
 import { IToken, ITokenData } from '../interfaces/jwt';
-import { authernticateToken } from '../middleware/auth';
+import { AuthernticateToken } from '../middleware/auth';
 import logging from '../config/logging';
 import config from '../config/config';
 import Daos from '../daos/Daos';
