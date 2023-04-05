@@ -22,6 +22,21 @@ export const USER_MAPPINGS: TypeMapping = {
             },
             index: false,
         },
+        refresh_tokens: {
+            type: 'object',
+            properties: {
+                user_agent: {
+                    type: 'keyword',
+                },
+                recommended: {
+                    type: 'keyword',
+                },
+                created_at: {
+                    type: 'date',
+                },
+            },
+            enabled: false,
+        },
         last_login: {
             type: 'date',
             index: false,
