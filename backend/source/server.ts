@@ -16,6 +16,7 @@ import { ValidateTypesVersion } from './middleware/types';
 
 import authRoutes from './routes/auth';
 import registerRoutes from './routes/register';
+import refreshRoutes from './routes/refresh';
 import gameRoutes from './routes/game';
 import developerRoutes from './routes/delveoper';
 import publisherRoutes from './routes/publisher';
@@ -78,6 +79,7 @@ app.use((req, res, next) => {
 /** Routes go here */
 app.use(`/${config.server.api_version}/auth`, authRoutes);
 app.use(`/${config.server.api_version}/auth/register`, registerRoutes);
+app.use(`/${config.server.api_version}/auth/refresh`, refreshRoutes);
 app.use(`/${config.server.api_version}/game`, gameRoutes);
 app.use(`/${config.server.api_version}/developer`, developerRoutes);
 app.use(`/${config.server.api_version}/publisher`, publisherRoutes);

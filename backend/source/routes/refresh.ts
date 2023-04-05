@@ -40,7 +40,7 @@ const authDao: AuthDao = Daos.AuthDao;
  *       422:
  *         description: The body does not correspond to the required body schema
  */
-router.post('/refresh', ValidateJoi(UserSchemas.refresh), async (req, res) => {
+router.post('/', ValidateJoi(UserSchemas.refresh), async (req, res) => {
     try {
         const { refreshToken } = req.body;
         const userAgent = req.headers['user-agent']!;
@@ -61,7 +61,7 @@ router.post('/refresh', ValidateJoi(UserSchemas.refresh), async (req, res) => {
         res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
         logging.error(NAMESPACE, 'refresh', error);
-        res.status(HTTP_STATUS_CODE.InternaleServerError).json({ message: HTTP_STATUS.InternaleServerError });
+        res.status(HTTP_STATUS_CODE.InternaleServerError).json({ ...HTTP_STATUS.InternaleServerError, cause: error });
     }
 });
 
