@@ -4,7 +4,6 @@ import type { Client as TypedClient } from '@elastic/elasticsearch/api/new';
 import csv from 'csv-parser';
 import { transformer } from './utils/transformer';
 import { GAME_MAPPINGS } from './schemas/games';
-// import { GAME_SETTINGS } from './schemas/games';
 import { DESCRIPTION_MAPPINGS } from './schemas/description';
 import { MEDIA_MAPPINGS } from './schemas/media';
 import { REQUIREMENTS_MAPPINGS } from './schemas/requirements';
@@ -20,32 +19,31 @@ interface IIndex {
 }
 
 const indices: Array<IIndex> = [
-    // {
-    //     name: 'games',
-    //     file: 'steam.csv',
-    //     mappings: GAME_MAPPINGS,
-    //     // settings: GAME_SETTINGS,
-    // },
-    // {
-    //     name: 'description',
-    //     file: 'steam_description_data.csv',
-    //     mappings: DESCRIPTION_MAPPINGS,
-    // },
-    // {
-    //     name: 'media',
-    //     file: 'steam_media_data.csv',
-    //     mappings: MEDIA_MAPPINGS,
-    // },
-    // {
-    //     name: 'requirements',
-    //     file: 'steam_requirements_data.csv',
-    //     mappings: REQUIREMENTS_MAPPINGS,
-    // },
-    // {
-    //     name: 'support',
-    //     file: 'steam_support_info.csv',
-    //     mappings: SUPPORT_MAPPINGS,
-    // },
+    {
+        name: 'games',
+        file: 'steam.csv',
+        mappings: GAME_MAPPINGS,
+    },
+    {
+        name: 'description',
+        file: 'steam_description_data.csv',
+        mappings: DESCRIPTION_MAPPINGS,
+    },
+    {
+        name: 'media',
+        file: 'steam_media_data.csv',
+        mappings: MEDIA_MAPPINGS,
+    },
+    {
+        name: 'requirements',
+        file: 'steam_requirements_data.csv',
+        mappings: REQUIREMENTS_MAPPINGS,
+    },
+    {
+        name: 'support',
+        file: 'steam_support_info.csv',
+        mappings: SUPPORT_MAPPINGS,
+    },
     {
         name: 'user',
         mappings: USER_MAPPINGS,
