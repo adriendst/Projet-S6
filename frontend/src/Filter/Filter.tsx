@@ -2,7 +2,15 @@ import React, {useState} from 'react';
 import {Checkbox, Collapse, Select, DatePicker, Input} from "antd";
 import {State} from "../store";
 import {useDispatch, useSelector} from "react-redux";
-import {changeDateByRange, changeDateByYear, changeUrl, loadGames, updateFilters, userConnection} from "../Slice/Slice";
+import {
+    changeDateByRange,
+    changeDateByYear,
+    changeUrl,
+    changeUserOnly,
+    loadGames,
+    updateFilters,
+    userConnection
+} from "../Slice/Slice";
 import './Filter.css'
 import MultipleSelect from "./MultipleSelect/MultipleSelect";
 import Fuse from "fuse.js";
@@ -25,6 +33,7 @@ const Filter = () => {
     const {RangePicker} = DatePicker;
     const [byYear, setByYear] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByYear));
     const [byRange, setByRange] = useState<boolean>(useSelector((state: State) => state.steam.filter.dateByRange));
+    const [byUser, setByUser] = useState<boolean>(useSelector((state: State) => state.steam.filter.user_only));
     const filters = useSelector((state: State) => state.steam.filter);
     const [date, setDate] = useState<Dayjs[] | undefined>(undefined);
     const refreshToken = useSelector((state: State) => state.steam.refreshToken)
@@ -113,6 +122,13 @@ const Filter = () => {
         dispatch(updateFilters(newFilters))
     }
 
+    const onUserOnlyChange = () => {
+        dispatch(changeUserOnly())
+        setByUser(!byUser)
+
+        const newFilters = {...filters, user_only: !byUser};
+        dispatch(updateFilters(newFilters))
+    }
     const onByRangeChange = () => {
         dispatch(changeDateByRange())
         setByRange(!byRange)
@@ -205,7 +221,7 @@ const Filter = () => {
                                 <div className={'divInput'}>
                                     <div>Search on my games</div>
                                     <div>
-                                        <Checkbox onChange={onByYearChange}>My Games</Checkbox>
+                                        <Checkbox onChange={onUserOnlyChange}>My Games</Checkbox>
                                     </div>
                                 </div>
                             }

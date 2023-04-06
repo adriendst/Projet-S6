@@ -19,9 +19,8 @@ const Login = () => {
             .then((response: AxiosResponse<any, any>) => {
                 console.log(response);
                 localStorage.setItem('refreshToken', response.data.refreshToken);
-                dispatch(userConnection(response.data.refreshToken));
-                // axios.defaults.baseURL = 'http://localhost:9090/v1';
-                axios.defaults.headers.common['authorization'] = `Bearer ${response.data.refreshToken}`
+                dispatch(userConnection(response.data));
+                axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
 
             });
         navigate( '/');

@@ -4,19 +4,34 @@ import './Layout.css'
 import {useDispatch, useSelector} from "react-redux";
 import {State} from "../store";
 import {userConnection} from "../Slice/Slice";
+import axios from "axios";
 
 
 const Layout = () => {
     const refreshToken = useSelector((state : State) => state.steam.refreshToken)
     const dispatch = useDispatch();
+
+    const logout = () => {
+        console.log(refreshToken)
+        axios.post("http://localhost:9090/v1/auth/logout", {refreshToken})
+            .then(response => {
+                localStorage.removeItem('refreshToken')
+                dispatch(userConnection(undefined))
+                console.log(response)
+                delete axios.defaults.headers.common['authorization']
+            })
+
+    }
     return (
         <div className={'layout'}>
             <div className={'layoutContent'}>
                 <Link to={'/'} className={'link'}>Home</Link>
                 {refreshToken === undefined ? <Link to={'/login'} className={'link'}>Login</Link> :
-                    <Link to={'/'} onClick={() => {
-                        dispatch(userConnection(undefined))
-                    }} className={'link'}>Logout</Link>}
+                    <Link to={'/'} onClick={() => { logout()}}
+                        // dispatch(userConnection(undefined))
+                        // localStorage.removeItem('refreshToken')
+
+                     className={'link'}>Logout</Link>}
 
             </div>
         </div>

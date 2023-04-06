@@ -1,5 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit'
 import data from '../data.json'
+import axios from "axios";
 
 export interface Filter {
     name: string | undefined,
@@ -16,6 +17,7 @@ export interface Filter {
     order_by : string | undefined,
     order_type : string | undefined,
     and_platforms : string | undefined
+    user_only : boolean
 }
 
 export interface Game {
@@ -51,7 +53,8 @@ export interface Steam {
     steamspy: [],
     searchPage: number,
     url : string,
-    refreshToken : string | undefined
+    refreshToken : string | undefined,
+    userGame : string[]
 }
 
 
@@ -72,7 +75,8 @@ export const Slice = createSlice({
             steamspy: [],
             order_by : undefined,
             order_type: undefined,
-            and_platforms : undefined
+            and_platforms : undefined,
+            user_only : false
         },
         displayType: false,
         game: [],
@@ -84,7 +88,8 @@ export const Slice = createSlice({
         steamspy: [],
         searchPage: 2,
         url : 'http://localhost:9090/v1/game/filter/1?',
-        refreshToken : undefined
+        refreshToken : undefined,
+        userGame : []
     },
     reducers: {
         changeDisplayType: (state: { displayType: boolean }) => {
@@ -99,6 +104,9 @@ export const Slice = createSlice({
         changeDateByRange: (state: { filter: Filter }) => {
             state.filter.dateByRange = !state.filter.dateByRange
             state.filter.release_date = []
+        },
+        changeUserOnly: (state: { filter: Filter }) => {
+            state.filter.user_only = !state.filter.user_only
         },
         loadGames: (state: { game: Game[], searchPage: number }, action: { payload: [Game[], number] }) => {
             if (action.payload[1] < 3) {
@@ -118,8 +126,31 @@ export const Slice = createSlice({
         changeUrl : (state : {url : string}, action : {payload : string})=> {
             state.url = action.payload
         },
-        userConnection : (state : {refreshToken : string | undefined}, action : {payload : string | undefined}) => {
-            state.refreshToken = action.payload
+        userConnection : (state : {refreshToken : string | undefined, userGame : number[]}, action : {payload : any | undefined | string}) => {
+            state.refreshToken = action.payload?.refreshToken  ?? action?.payload
+
+            if(state.refreshToken === undefined){
+                state.userGame = []
+            }
+            else{
+                if(typeof action.payload === 'string'){
+                    axios.post('http://localhost:9090/v1/auth/refresh', {'refreshToken': state.refreshToken})
+                        .then(response => {
+                            axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
+                            state.userGame = response.data.user.games
+                        })
+                }
+                else{
+                    state.userGame = action.payload.user.games
+                }
+                setInterval(() => {
+                    axios.post('http://localhost:9090/v1/auth/refresh', {'refreshToken': state.refreshToken})
+                        .then(response => {
+                            axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
+                            state.userGame = response.data.user.games
+                        })
+                }, 27 * 60 * 1000)
+            }
         }
     },
 });
@@ -130,6 +161,7 @@ export const {
     updateFilters,
     changeDateByYear,
     changeDateByRange,
+    changeUserOnly,
     loadGames,
     loadGenres,
     loadCategories,

@@ -8,7 +8,6 @@ import Layout from "../Layout/Layout";
 
 
 const onFinish = (values: any) => {
-    console.log(values)
     axios.post("http://localhost:9090/v1/auth/register", {"email": values.email, "password": values.password})
         .then(response => console.log(response))
 };

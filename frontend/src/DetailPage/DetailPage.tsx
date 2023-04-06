@@ -55,6 +55,7 @@ const DetailPage = () => {
 
     const addGame = () => {
         axios.get(`http://localhost:9090/v1/game/toggle/${data.appid}`)
+            .then(response => console.log(response))
     }
 
 

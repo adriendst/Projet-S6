@@ -8,7 +8,8 @@ import Filter from "../Filter/Filter";
 import Layout from "../Layout/Layout";
 import './SearchPage.css'
 import {FaArrowAltCircleUp} from 'react-icons/fa'
-import {changeUrl, loadGames, loadGenres, loadCategories} from "../Slice/Slice";
+import {changeUrl, loadGames, loadGenres, loadCategories, userConnection} from "../Slice/Slice";
+import axios from "axios";
 
 
 const SearchPage = () => {
@@ -22,6 +23,7 @@ const SearchPage = () => {
 
 
     const games = useSelector((state: State) => state.steam.game);
+    const refreshToken = localStorage.getItem('refreshToken')
     useEffect(() => {
         if(games) {
             if (games.length === 0) {
@@ -38,6 +40,18 @@ const SearchPage = () => {
                     })
                     .catch(error => alert("Erreur : " + error));
             }
+        }
+
+        if(refreshToken !== null){
+            dispatch(userConnection(refreshToken))
+            //
+            // console.log(refreshToken)
+            // axios.post('http://localhost:9090/v1/auth/refresh', {'refreshToken' : refreshToken})
+            //     .then(response => {
+            //         axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
+            //         console.log(response)
+            //         dispatch(userConnection(response.data))
+            //     })
         }
     }, []);
 
@@ -68,6 +82,14 @@ const SearchPage = () => {
                     } else {
                         if(!isNaN(filtersRecord[filtersKey]))
                             console.log('coucouc')
+                        test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
+                    }
+                }
+            }
+            else{
+                console.log(filtersKey)
+                if(filtersKey === 'user_only'){
+                    if(filtersRecord[filtersKey] === true){
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
                     }
                 }
