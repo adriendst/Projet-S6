@@ -4,7 +4,8 @@ ROUBLOT, DESTREMONT, STANCATO, HIPPERT
 
 ## Project links:
 
--   [Enoncé sut Github](https://github.com/adriendst/Projet-S6/blob/main/projetTutore.pdf)
+-   [Enoncé sur Github](https://github.com/adriendst/Projet-S6/blob/main/projetTutore.pdf)
+-   [Documentation sur Github](https://github.com/adriendst/Projet-S6/blob/main/Documentation.pdf)
 -   [Github](https://github.com/adriendst/Projet-S6/)
 -   [Trello](https://trello.com/b/GndgC8xN/projet-tut-s6)
 -   [Google Doc](https://docs.google.com/document/d/1S0IetihBVwitLCX3-taJNvmP4AL-9vvyjZV2kDhPdg8/edit#heading=h.vkxgr83ff0xh)
