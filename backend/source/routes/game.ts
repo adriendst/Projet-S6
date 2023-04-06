@@ -141,7 +141,7 @@ router.get('/filter/:page', ValidateQueryJoi(FilterSchemas.gameFilter), CheckTok
     // pattern: “[^,]+”
     const page = parseInt(req.params.page) ?? 1;
     const filters = req.query as FilterParameters;
-    if (filters.user_only === true) {
+    if (filters.user_only !== undefined && filters.user_only === true) {
         if (req.tokenData === undefined) {
             res.status(HTTP_STATUS_CODE.Unauthorized).json({ cause: 'You are missing a token or it is invalid!' });
             return;
