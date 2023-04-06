@@ -137,7 +137,7 @@ export const Slice = createSlice({
                     axios.post('http://localhost:9090/v1/auth/refresh', {'refreshToken': state.refreshToken})
                         .then(response => {
                             axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
-                            state.userGame = response.data.user.games
+                            // state.userGame = response.data.user.games
                         })
                 }
                 else{
