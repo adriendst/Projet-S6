@@ -151,6 +151,10 @@ export const Slice = createSlice({
                         })
                 }, 27 * 60 * 1000)
             }
+
+        },
+        addGameToUser : (state : {userGame : string[]}, action : {payload : string[]}) => {
+            state.userGame = action.payload
         }
     },
 });
@@ -166,7 +170,8 @@ export const {
     loadGenres,
     loadCategories,
     changeUrl,
-    userConnection
+    userConnection,
+    addGameToUser
 } = Slice.actions;
 
 export default Slice.reducer;

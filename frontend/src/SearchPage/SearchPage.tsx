@@ -23,7 +23,6 @@ const SearchPage = () => {
 
 
     const games = useSelector((state: State) => state.steam.game);
-    const refreshToken = localStorage.getItem('refreshToken')
     useEffect(() => {
         if(games) {
             if (games.length === 0) {
@@ -42,17 +41,7 @@ const SearchPage = () => {
             }
         }
 
-        if(refreshToken !== null){
-            dispatch(userConnection(refreshToken))
-            //
-            // console.log(refreshToken)
-            // axios.post('http://localhost:9090/v1/auth/refresh', {'refreshToken' : refreshToken})
-            //     .then(response => {
-            //         axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
-            //         console.log(response)
-            //         dispatch(userConnection(response.data))
-            //     })
-        }
+
     }, []);
 
 
@@ -99,8 +88,8 @@ const SearchPage = () => {
 
         console.log(test)
 
-        fetch(test)
-            .then(response => response.json())
+        axios.get(test)
+            .then(response => response.data)
             .then(response => {
                 dispatch(loadGames([response.results, 2]));
             })

@@ -1,15 +1,20 @@
 import React from 'react';
-import {Provider} from "react-redux";
+import {Provider, useDispatch} from "react-redux";
 import store from "./store";
 import SearchPage from "./SearchPage";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Login from "./Login/Login";
 import Register from "./Register/Register";
 import DetailPage from './DetailPage';
+import {userConnection} from "./Slice/Slice";
 
 const SteamWrapper = () => {
+    const dispatch = useDispatch()
+    const refreshToken = localStorage.getItem('refreshToken')
+    if(refreshToken !== null){
+        dispatch(userConnection(refreshToken))
+    }
     return (
-        <Provider store={store}>
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<SearchPage/>}/>
@@ -18,7 +23,6 @@ const SteamWrapper = () => {
                     <Route path="/game/:gameid" element={<DetailPage/>}/>
                 </Routes>
             </BrowserRouter>
-        </Provider>
     );
 };
 

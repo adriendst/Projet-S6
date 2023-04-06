@@ -4,19 +4,36 @@ import Layout from '../Layout';
 import {Tabs, Carousel, Button, Image, Descriptions, Col, Row, Tag} from 'antd';
 import type {TabsProps} from 'antd';
 import './DetailPage.css'
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {State} from "../store";
 import axios from "axios";
-import {userConnection} from "../Slice/Slice";
+import {addGameToUser, loadCategories, loadGenres} from "../Slice/Slice";
 
 
 const DetailPage = () => {
 
+
+    const dispatch = useDispatch()
     const param = useParams();
     const [data, setData] = useState<undefined | any>(undefined);
+    const [isAlreadyInUserGame, setIsAlreadyInUserGame] = useState<boolean>(true);
     console.log(data)
 
-    const refreshToken = useSelector((state : State) => state.steam.refreshToken)
+    const refreshToken = useSelector((state: State) => state.steam.refreshToken)
+    const idGamesUser = useSelector((state: State) => state.steam.userGame)
+    console.log(idGamesUser)
+    console.log(param.gameid)
+
+
+    if (param.gameid !== undefined) {
+        console.log(idGamesUser)
+    }
+    useEffect(() => {
+        console.log(idGamesUser)
+
+    }, [idGamesUser]);
+
+    console.log(isAlreadyInUserGame)
 
     useEffect(() => {
         fetch("http://localhost:9090/v1/game/" + param.gameid)
@@ -55,7 +72,7 @@ const DetailPage = () => {
 
     const addGame = () => {
         axios.get(`http://localhost:9090/v1/game/toggle/${data.appid}`)
-            .then(response => console.log(response))
+            .then(response => dispatch(addGameToUser(response.data.games)))
     }
 
 
@@ -108,13 +125,22 @@ const DetailPage = () => {
             </Row>
 
             <Row align="middle">
-                {refreshToken === undefined ? <div></div> :<Col span={24}>
+                {refreshToken === undefined ? <div></div> : isAlreadyInUserGame ?<Col span={24}>
                     <hr/>
                     <div className="addGame">
                         <h2>You like this game? </h2>
 
                         <h4>Add it to your library</h4>
                         <Button onClick={addGame} size={'large'}>Add</Button>
+                    </div>
+                    <hr/>
+                </Col> : <Col span={24}>
+                    <hr/>
+                    <div className="addGame">
+                        <h2>You don't like this game anymore? </h2>
+
+                        <h4>Remove it from your library</h4>
+                        <Button onClick={addGame} size={'large'}>Remove</Button>
                     </div>
                     <hr/>
                 </Col>}

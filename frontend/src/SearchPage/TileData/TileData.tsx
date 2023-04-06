@@ -10,6 +10,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 
 import {FixedSizeGrid as Grid} from "react-window";
 import {changeUrl, loadGames} from "../../Slice/Slice";
+import axios from "axios";
 
 const TileData = () => {
 
@@ -82,10 +83,9 @@ const TileData = () => {
                 let newUrl = split[0].slice(0, -1) + page + '?' + split[1];
 
                 dispatch(changeUrl(newUrl))
-                fetch(newUrl)
-                    .then(response => response.json())
+                axios.get(newUrl)
                     .then(response => {
-                        dispatch(loadGames([response.results, searchPage + 1]));
+                        dispatch(loadGames([response.data.results, searchPage + 1]));
                     })
                     .catch(error => alert("Erreur : " + error));
                 setLastCall(now);
