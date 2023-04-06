@@ -39,6 +39,15 @@
  *       example: "Val"
  *       description: A string/name to filter the games by
  *
+ *     UserLibraryParameter:
+ *       in: query
+ *       name: user_only
+ *       required: false
+ *       schema:
+ *         type: boolean
+ *         default: false
+ *       description: To filter only games that the user has in his library.
+ *
  *     ResultsParameter:
  *       in: query
  *       name: results

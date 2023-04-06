@@ -32,6 +32,7 @@ const FilterSchemas = {
             .valid(...SORTING_OPTIONS)
             .optional(),
         order_type: Joi.string().valid('asc', 'desc').optional().default(DEFAULTS.sorting),
+        user_only: Joi.boolean().optional().default(false),
     }),
 };
 

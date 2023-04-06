@@ -5,7 +5,7 @@ import GameDao from '../daos/GameDao';
 import { CompletionParameters, FilterParameters } from '@steam-wiki/types';
 import { ValidateParamsJoi, ValidateQueryJoi } from '../middleware/joi';
 import FilterSchemas from '../joi-schemas/filter';
-import { AuthernticateToken } from '../middleware/auth';
+import { AuthernticateToken, CheckToken } from '../middleware/auth';
 import UserDao from '../daos/UserDao';
 import CompletionSchemas from '../joi-schemas/completion';
 import QuerySchemas from '../joi-schemas/query';
@@ -113,6 +113,8 @@ router.get('/:id', ValidateParamsJoi(QuerySchemas.numberId), (req, res) => {
  *   get:
  *     summary: Get games
  *     tags: [Game]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/TypesVersionHeader'
  *       - $ref: '#/components/parameters/PageParameter'
@@ -128,16 +130,27 @@ router.get('/:id', ValidateParamsJoi(QuerySchemas.numberId), (req, res) => {
  *       - $ref: '#/components/parameters/EndDateParameter'
  *       - $ref: '#/components/parameters/OrderByParamter'
  *       - $ref: '#/components/parameters/OrderTypeParameter'
+ *       - $ref: '#/components/parameters/UserLibraryParameter'
  *     responses:
  *       200:
  *         description: Sucessfully retrived games
  *       422:
  *         description: The entered parameters do not correspond to the schema
  */
-router.get('/filter/:page', ValidateQueryJoi(FilterSchemas.gameFilter), (req, res) => {
+router.get('/filter/:page', ValidateQueryJoi(FilterSchemas.gameFilter), CheckToken, async (req, res) => {
     // pattern: “[^,]+”
     const page = parseInt(req.params.page) ?? 1;
     const filters = req.query as FilterParameters;
+    if (filters.user_only === true) {
+        if (req.tokenData === undefined) {
+            res.status(HTTP_STATUS_CODE.Unauthorized).json({ cause: 'You are missing a token or it is invalid!' });
+            return;
+        } else {
+            const user = await userDao.getById(req.tokenData.userId);
+            filters.games = user.games;
+        }
+    }
+
     gameDao
         .filterGames(page, filters)
         .then((data) => res.status(HTTP_STATUS_CODE.Ok).json(data))

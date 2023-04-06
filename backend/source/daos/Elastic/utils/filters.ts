@@ -92,3 +92,9 @@ const addKeywordFilter = (filters: Array<QueryContainer>, keywords: string | und
     if (and_operator) filters.push(...keywords.map((keyword) => ({ term: { [key]: keyword } })));
     else filters.push({ terms: { [key]: keywords } });
 };
+
+export const addGamesFilter = (filters: Array<QueryContainer>, { user_only, games }: FilterParameters) => {
+    if (user_only === false || games === undefined || games.length === 0) return;
+
+    filters.push({ terms: { _id: games } });
+};

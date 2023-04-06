@@ -23,8 +23,9 @@ export const CheckToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader?.split(' ')[1];
 
-    const secret = process.env.ACCESS_TOKEN_SECRET;
+    const secret = config.auth.access_token_secret;
     if (secret && token) {
+        console.log(token);
         jwt.verify(token, secret, (err, jwtData) => {
             if (err) return res.status(HTTP_STATUS_CODE.Forbidden).json({ message: 'Invalid token' });
             const data = jwtData as JWTTokenData;

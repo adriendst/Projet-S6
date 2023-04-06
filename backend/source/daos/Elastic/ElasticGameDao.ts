@@ -4,7 +4,18 @@ import GameDao from '../GameDao';
 import { Game, CompletionParameters, FilterParameters, GetGameReponseBody, FilterGamesResponseBody, DetailedGame } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
-import { addAgeFilter, addCategoryFilter, addDateFilter, addDeveloperFilter, addGenreFilter, addNameFilter, addPlatformFilter, addPublisherFilter, getFuzzyFilter } from './utils/filters';
+import {
+    addAgeFilter,
+    addCategoryFilter,
+    addDateFilter,
+    addDeveloperFilter,
+    addGamesFilter,
+    addGenreFilter,
+    addNameFilter,
+    addPlatformFilter,
+    addPublisherFilter,
+    getFuzzyFilter,
+} from './utils/filters';
 import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
@@ -88,6 +99,7 @@ const ElasticGameDao: GameDao = {
                 logging.info(NAMESPACE, 'params', params);
                 const filters: Array<QueryContainer> = [];
                 const sort: Sort = [];
+                addGamesFilter(filters, params);
                 addNameFilter(filters, params);
                 addDeveloperFilter(filters, params);
                 addPublisherFilter(filters, params);
@@ -106,29 +118,36 @@ const ElasticGameDao: GameDao = {
                 }
 
                 const query = { bool: { must: filters } };
+                let totalCount = 0;
+                let results: Array<Game> = [];
 
-                const [resultRes, countReds] = await Promise.all([
-                    ElasticConnector.instance.client.search<Game>({
-                        index: indexName,
-                        body: {
-                            query,
-                            sort,
-                            from: (page - 1) * PAGE_SIZE,
-                            size: PAGE_SIZE,
-                        },
-                    }),
-                    ElasticConnector.instance.client.count({
-                        index: indexName,
-                        body: { query },
-                    }),
-                ]);
+                if (params.user_only === false || (params.games !== undefined && params.games.length > 0)) {
+                    const [resultRes, countReds] = await Promise.all([
+                        ElasticConnector.instance.client.search<Game>({
+                            index: indexName,
+                            body: {
+                                query,
+                                sort,
+                                from: (page - 1) * PAGE_SIZE,
+                                size: PAGE_SIZE,
+                            },
+                        }),
+                        ElasticConnector.instance.client.count({
+                            index: indexName,
+                            body: { query },
+                        }),
+                    ]);
+
+                    totalCount = countReds.body.count;
+                    results = resultRes.body.hits.hits.map((doc) => doc._source) as Array<Game>;
+                }
 
                 const response = {
                     page: page,
                     pageSize: PAGE_SIZE,
-                    total: countReds.body.count,
-                    totalPages: Math.ceil(countReds.body.count / PAGE_SIZE),
-                    results: resultRes.body.hits.hits.map((doc) => doc._source) as Array<Game>,
+                    total: totalCount,
+                    totalPages: Math.ceil(totalCount / PAGE_SIZE),
+                    results,
                     filters,
                 };
 
