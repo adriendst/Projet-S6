@@ -1,6 +1,5 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import AuthDao from '../daos/AuthDao';
 import { ValidateJoi } from '../middleware/joi';
 import { JWTTokenData } from '@steam-wiki/types';
 import { HTTP_STATUS_CODE, HTTP_STATUS } from '../config/http_status';
@@ -9,10 +8,10 @@ import Daos from '../daos/Daos';
 import logging from '../config/logging';
 import UserDao from '../daos/UserDao';
 import UserSchemas from '../joi-schemas/user';
+
 const NAMESPACE = 'REFRESH-ROUTE';
 const router = express.Router();
 
-const authDao: AuthDao = Daos.AuthDao;
 const userDao: UserDao = Daos.UserDao;
 
 /**
@@ -55,7 +54,7 @@ router.post('/', ValidateJoi(UserSchemas.refresh), async (req, res) => {
         const dbToken = dbTokens.find((value) => value.token === refreshToken);
 
         if (dbToken === undefined) {
-            return res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Invalid refresh token' });
+            return res.status(HTTP_STATUS_CODE.Unauthorized).json({ message: 'Invalid or expired refresh token' });
         }
 
         // Génère un nouveau jeton d'accès
