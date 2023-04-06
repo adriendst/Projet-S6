@@ -7,7 +7,7 @@ import './DetailPage.css'
 import {useDispatch, useSelector} from "react-redux";
 import {State} from "../store";
 import axios from "axios";
-import {addGameToUser, loadCategories, loadGenres} from "../Slice/Slice";
+import {addGameToUser} from "../Slice/Slice";
 import {useNavigate} from "react-router-dom";
 
 
@@ -19,13 +19,9 @@ const DetailPage = () => {
     const param = useParams();
     const [data, setData] = useState<undefined | any>(undefined);
     const [isAlreadyInUserGame, setIsAlreadyInUserGame] = useState<boolean>(true);
-    console.log(data)
 
     const refreshToken = useSelector((state: State) => state.steam.refreshToken)
     const idGamesUser = useSelector((state: State) => state.steam.userGame) as unknown as number[]
-    console.log(idGamesUser)
-    console.log(param)
-    console.log(typeof idGamesUser[0])
 
 
     useEffect(() => {

@@ -8,7 +8,7 @@ import Filter from "../Filter/Filter";
 import Layout from "../Layout/Layout";
 import './SearchPage.css'
 import {FaArrowAltCircleUp} from 'react-icons/fa'
-import {changeUrl, loadGames, loadGenres, loadCategories, userConnection} from "../Slice/Slice";
+import {changeUrl, loadGames, loadGenres, loadCategories} from "../Slice/Slice";
 import axios from "axios";
 
 
@@ -49,7 +49,6 @@ const SearchPage = () => {
     useEffect(() => {
         let test = 'http://localhost:9090/v1/game/filter/1?'
         const filtersRecord = filters as Record<string, any>
-        // console.log(filtersRecord)
         for (let filtersKey in filters) {
             if (typeof filtersRecord[filtersKey] !== "boolean") {
                 if (filtersRecord[filtersKey] !== undefined && filtersRecord[filtersKey].length !== 0 && filtersRecord[filtersKey] !== null) {
@@ -66,17 +65,14 @@ const SearchPage = () => {
                             for (let i = 0; i < filtersRecord[filtersKey].length; i++) {
                                 test = test + `&${filtersKey}=${filtersRecord[filtersKey][i]}`
                             }
-                        // &start_date=1999-01-01&end_date=2022-12-31
                         }
                     } else {
                         if(!isNaN(filtersRecord[filtersKey]))
-                            console.log('coucouc')
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
                     }
                 }
             }
             else{
-                console.log(filtersKey)
                 if(filtersKey === 'user_only'){
                     if(filtersRecord[filtersKey] === true){
                         test = test + `&${filtersKey}=${filtersRecord[filtersKey]}`
@@ -85,8 +81,6 @@ const SearchPage = () => {
             }
         }
         dispatch(changeUrl(test))
-
-        console.log(test)
 
         axios.get(test)
             .then(response => response.data)

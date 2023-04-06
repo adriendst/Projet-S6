@@ -9,11 +9,10 @@ import Layout from "../Layout/Layout";
 
 const onFinish = (values: any) => {
     axios.post("http://localhost:9090/v1/auth/register", {"email": values.email, "password": values.password})
-        .then(response => console.log(response))
 };
 
 const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
+
 };
 
 const Register = () => {

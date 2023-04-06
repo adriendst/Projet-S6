@@ -5,22 +5,16 @@ import {useDispatch, useSelector} from "react-redux";
 import {
     changeDateByRange,
     changeDateByYear,
-    changeUrl,
     changeUserOnly,
-    loadGames,
     updateFilters,
-    userConnection
 } from "../Slice/Slice";
 import './Filter.css'
 import MultipleSelect from "./MultipleSelect/MultipleSelect";
-import Fuse from "fuse.js";
 import MultipleSelectWithFuzzySearch from "./MultipleSelectWithFuzzySearch/MultipleSelectWithFuzzySearch";
 import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
 import {RangeValue} from 'rc-picker/lib/interface';
-
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import {Link} from "react-router-dom";
 
 
 const Filter = () => {
@@ -74,14 +68,12 @@ const Filter = () => {
             date.push(dateStrings[i])
             datejs.push(dayjs(dateStrings[i], dateFormat))
         }
-        console.log(dateStrings)
         const newFilters = {...filters, release_date: date};
         dispatch(updateFilters(newFilters))
         setDate(datejs)
     }
 
     const onDateChange = (value: Dayjs | null, dateString: string) => {
-        console.log(value, dateString)
         const newFilters = {...filters, release_date: [dateString]};
         dispatch(updateFilters(newFilters))
         setDate([dayjs(dateString, dateFormat)])
@@ -91,7 +83,6 @@ const Filter = () => {
     const onByYearChange = () => {
         dispatch(changeDateByYear())
         setByYear(!byYear)
-        console.log(byYear)
         let date = []
         let datejs = []
         if (byYear) {
@@ -105,7 +96,6 @@ const Filter = () => {
                 const dateString = `${month}-${day}`;
 
                 const newDate = filters.release_date[i].slice(0, 5)
-                console.log(newDate + dateString);
                 date.push(newDate + dateString)
                 datejs.push(dayjs(newDate + dateString, dateFormat))
             }
@@ -135,7 +125,6 @@ const Filter = () => {
     }
 
     const dateFormat = 'YYYY-MM-DD';
-    const yearFormat = 'YYYY';
 
 
     const onOrderByChange = (value: string) => {

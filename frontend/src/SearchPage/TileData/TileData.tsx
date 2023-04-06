@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState} from 'react';
 import {Card} from "antd";
 import {State} from "../../store";
 import {useDispatch, useSelector} from "react-redux";
@@ -7,7 +7,6 @@ import {FaLinux, FaWindows, FaApple} from 'react-icons/fa';
 import {AiOutlineStop} from 'react-icons/ai'
 import {Link} from "react-router-dom";
 import AutoSizer from "react-virtualized-auto-sizer";
-
 import {FixedSizeGrid as Grid} from "react-window";
 import {changeUrl, loadGames} from "../../Slice/Slice";
 import axios from "axios";

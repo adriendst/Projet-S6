@@ -1,11 +1,8 @@
 import {Select} from 'antd';
 import React, {useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {State} from "../../store";
+import {useDispatch} from "react-redux";
 import {Filter, updateFilters} from "../../Slice/Slice";
-import Fuse from "fuse.js";
-import {Simulate} from "react-dom/test-utils";
-import select = Simulate.select;
+
 
 interface MultipleSelectInterface{
     filters : Filter,
@@ -25,7 +22,6 @@ const MultipleSelectWithFuzzySearch = ({filters, selectParam} : MultipleSelectIn
     const placeholder = `Search a game by his ${selectParam.toLowerCase()}`
 
     const handleChange = (value: string[]) => {
-        console.log(`Selected: ${value}`);
         const newFilters = {...filters, [selectParam.toLowerCase()]: value};
         dispatch(updateFilters(newFilters));
         setValue(value);
@@ -33,7 +29,6 @@ const MultipleSelectWithFuzzySearch = ({filters, selectParam} : MultipleSelectIn
 
     const [filteredOptions, setFilteredOptions] = useState<{ value: string; label: string; }[]>([]);
     const test = (value: string)=> {
-        console.log(selectParam)
         let url;
         if(selectParam === 'Developers') {
              url = `http://localhost:9090/v1/developer/complete?searchText=${value}&results=20`;

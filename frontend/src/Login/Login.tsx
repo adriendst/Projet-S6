@@ -8,8 +8,6 @@ import Layout from "../Layout/Layout";
 import {useDispatch} from "react-redux";
 import {userConnection} from "../Slice/Slice";
 
-
-
 const Login = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -17,7 +15,6 @@ const Login = () => {
     const onFinish = (values: any) => {
         axios.post('http://localhost:9090/v1/auth/login', {'email': values.email, 'password': values.password})
             .then((response: AxiosResponse<any, any>) => {
-                console.log(response);
                 localStorage.setItem('refreshToken', response.data.refreshToken);
                 dispatch(userConnection(response.data));
                 axios.defaults.headers.common['authorization'] = `Bearer ${response.data.accessToken}`
@@ -27,7 +24,7 @@ const Login = () => {
     };
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+
     };
 
     return (

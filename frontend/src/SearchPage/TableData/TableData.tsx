@@ -1,11 +1,9 @@
 import React, {useState} from 'react';
 import {State} from "../../store";
-
 import {useDispatch, useSelector} from "react-redux";
 import {FixedSizeList as List} from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer'
 import './TableData.css'
-
 import {Link} from "react-router-dom";
 import {loadGames} from "../../Slice/Slice";
 
@@ -24,9 +22,6 @@ const TableData = () => {
         const minimumInterval = 750;
 
         if (scrollTop > 150 * games.length / 1.20 && timeSinceLastCall >= minimumInterval) {
-            let url = "http://localhost:9090/v1/game/filter/" + searchPage
-            console.log(url)
-
             fetch("http://localhost:9090/v1/game/filter/" + searchPage)
                 .then(response => response.json())
                 .then(response => {
