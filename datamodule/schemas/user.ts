@@ -28,7 +28,7 @@ export const USER_MAPPINGS: TypeMapping = {
                 user_agent: {
                     type: 'keyword',
                 },
-                recommended: {
+                token: {
                     type: 'keyword',
                 },
                 created_at: {

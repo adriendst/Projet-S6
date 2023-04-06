@@ -1,27 +1,10 @@
-import { ILogin, IRegister, User } from '../interfaces/auth';
-import { IToken, ITokenData } from '../interfaces/jwt';
 import { BaseDao } from './Daos';
-
-export interface ILoginResponse {
-    code: number;
-    message: any;
-    data: ITokenData;
-}
-
-export interface IRefreshReponse {
-    data: IToken;
-}
+import { PrivateUser, RegsiterData } from '@steam-wiki/types';
 
 export interface AuthDao extends BaseDao {
-    createUser(user: IRegister): Promise<boolean>;
+    createUser(user: RegsiterData): Promise<boolean>;
 
-    loginUser(params: ILogin): Promise<ILoginResponse>;
-
-    insertToken(arg0: { userId: string; token: string; userAgent: string }): unknown;
-
-    findByEmail(email: string): Promise<User | undefined>;
-
-    findToken(tokenData: { userId: string; token: string; userAgent: string }): Promise<IToken | null>;
+    findByEmail(email: string): Promise<PrivateUser | undefined>;
 }
 
 export default AuthDao;

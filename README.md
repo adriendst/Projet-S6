@@ -35,7 +35,7 @@ to start the development server: If the server started successfully, the documen
 
 ## Types package
 
-### Check the current version:
+### Check the version:
 
 ```sh
 npm list @steam-wiki/types

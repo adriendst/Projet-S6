@@ -41,9 +41,6 @@ export const GAME_MAPPINGS: TypeMapping = {
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
-                // completion: {
-                //     type: 'completion',
-                // },
             },
         },
         publisher: {
@@ -56,9 +53,6 @@ export const GAME_MAPPINGS: TypeMapping = {
                 autocomplete: {
                     type: 'search_as_you_type',
                 },
-                // completion: {
-                //     type: 'completion',
-                // },
             },
         },
         platforms: {

@@ -1,5 +1,5 @@
-import { IdParameters, GetGameReponseBody, CompletionParameters, CompleteGameResponseBody, FilterParameters, FilterGamesResponseBody } from '@steam-wiki/types';
 import { BaseDao } from './Daos';
+import { IdParameters, GetGameReponseBody, CompletionParameters, CompleteGameResponseBody, FilterParameters, FilterGamesResponseBody } from '@steam-wiki/types';
 
 interface GameDao extends BaseDao {
     completeName(params: CompletionParameters): Promise<CompleteGameResponseBody>;

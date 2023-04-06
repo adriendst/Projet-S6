@@ -1,7 +1,6 @@
 import DateExtension from '@joi/date';
 import JoiImport from 'joi';
-import { ILogin, RegisterRequestBody } from '../interfaces/auth';
-import { IToken } from '../interfaces/jwt';
+import { LoginRequestBody, RegisterRequestBody, JWTToken } from '@steam-wiki/types';
 
 const Joi = JoiImport.extend(DateExtension) as typeof JoiImport;
 
@@ -16,11 +15,14 @@ const UserSchemas = {
         email: UserProperties.email.required(),
         password: UserProperties.password.required(),
     }),
-    login: Joi.object<ILogin>({
+    login: Joi.object<LoginRequestBody>({
         email: UserProperties.email.required(),
         password: UserProperties.password.required(),
     }),
-    refresh: Joi.object<IToken>({
+    logout: Joi.object<JWTToken>({
+        refreshToken: UserProperties.refreshToken.required(),
+    }),
+    refresh: Joi.object<JWTToken>({
         refreshToken: UserProperties.refreshToken.required(),
     }),
     delete: Joi.object({

@@ -1,12 +1,10 @@
 import logging from '../../config/logging';
 import DEFAULTS from '../../config/defaults';
 import GameDao from '../GameDao';
-import { Game, CompletionParameters, FilterParameters, CompleteGameResponseBody, GetGameReponseBody, FilterGamesResponseBody } from '@steam-wiki/types';
+import { Game, CompletionParameters, FilterParameters, GetGameReponseBody, FilterGamesResponseBody, DetailedGame } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
 import { addAgeFilter, addCategoryFilter, addDateFilter, addDeveloperFilter, addGenreFilter, addNameFilter, addPlatformFilter, addPublisherFilter, getFuzzyFilter } from './utils/filters';
-import { HTTP_STATUS, HTTP_STATUS_CODE } from '../../config/http_status';
 import { DaoErrorHandler } from './utils/error_handler';
 
 const indexName = 'games';
@@ -76,7 +74,7 @@ const ElasticGameDao: GameDao = {
                             .catch(() => null),
                     ),
                 ]);
-                const game = results.reduce((acc, result) => (result !== null && result.body._source ? { ...acc, ...result.body._source } : acc), {});
+                const game = results.reduce((acc, result) => (result !== null && result.body._source ? { ...acc, ...result.body._source } : acc), {}) as DetailedGame;
                 resolve({ game });
             } catch (error) {
                 DaoErrorHandler(error, reject, NAMESPACE);
@@ -130,7 +128,7 @@ const ElasticGameDao: GameDao = {
                     pageSize: PAGE_SIZE,
                     total: countReds.body.count,
                     totalPages: Math.ceil(countReds.body.count / PAGE_SIZE),
-                    results: resultRes.body.hits.hits.map((doc) => doc._source),
+                    results: resultRes.body.hits.hits.map((doc) => doc._source) as Array<Game>,
                     filters,
                 };
 

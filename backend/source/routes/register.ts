@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
-import UserSchemas from '../schemas/User';
 import ElasticAuthDao from '../daos/Elastic/ElasticAuthDao';
-import { IRegister, RegisterRequestBody } from '../interfaces/auth';
+import { RegsiterData, RegisterRequestBody } from '@steam-wiki/types';
 import bcrypt from 'bcrypt';
 import { HTTP_STATUS_CODE } from '../config/http_status';
 import { ValidateJoi } from '../middleware/joi';
+import UserSchemas from '../joi-schemas/user';
 
 const router = express.Router();
 
@@ -40,7 +40,7 @@ router.post('/', ValidateJoi(UserSchemas.register), async (req: Request<{}, {}, 
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
     // Création d'un nouvel utilisateur
-    const user: IRegister = {
+    const user: RegsiterData = {
         email: body.email,
         password_hash: hashedPassword,
     };

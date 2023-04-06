@@ -3,7 +3,7 @@ import { HTTP_STATUS_CODE } from '../config/http_status';
 import Daos from '../daos/Daos';
 import DeveloperDao from '../daos/DeveloperDao';
 import { CompletionParameters } from '@steam-wiki/types';
-import CompletionSchemas from '../joi/completion';
+import CompletionSchemas from '../joi-schemas/completion';
 import { ValidateJoi, ValidateQueryJoi } from '../middleware/joi';
 
 const NAMESPACE = 'DEVELOPER-ROUTE';

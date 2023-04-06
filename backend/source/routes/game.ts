@@ -4,11 +4,11 @@ import Daos from '../daos/Daos';
 import GameDao from '../daos/GameDao';
 import { CompletionParameters, FilterParameters } from '@steam-wiki/types';
 import { ValidateParamsJoi, ValidateQueryJoi } from '../middleware/joi';
-import CompletionSchemas from '../joi/completion';
-import QuerySchemas from '../joi/query';
-import FilterSchemas from '../schemas/Filter';
+import FilterSchemas from '../joi-schemas/filter';
 import { AuthernticateToken } from '../middleware/auth';
 import UserDao from '../daos/UserDao';
+import CompletionSchemas from '../joi-schemas/completion';
+import QuerySchemas from '../joi-schemas/query';
 
 const NAMESPACE = 'GAME-ROUTE';
 

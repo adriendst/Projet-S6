@@ -1,5 +1,3 @@
-import logging from '../../config/logging';
-import { HTTP_STATUS } from '../../config/http_status';
 import { Game, GetAllCategoriesResponseBody } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
 import CategoryDao from '../CategoryDao';

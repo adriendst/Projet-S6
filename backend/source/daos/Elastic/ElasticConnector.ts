@@ -40,8 +40,6 @@ class ElasticConnector {
     };
 }
 
-
-
 export const ElasticBaseDao: BaseDao = {
     destroy: ElasticConnector.instance.destroy,
     client: ElasticConnector.instance.client,

@@ -1,5 +1,3 @@
-import logging from '../../config/logging';
-import { HTTP_STATUS } from '../../config/http_status';
 import { Game } from '@steam-wiki/types';
 import GenreDao from '../GenreDao';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
@@ -22,7 +20,7 @@ const ElasticGenreDao: GenreDao = {
                             unique_values: {
                                 terms: {
                                     field: 'genres.keyword',
-                                    size: 100,
+                                    size: 250,
                                 },
                             },
                         },

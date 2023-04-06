@@ -1,11 +1,10 @@
-import logging from '../../config/logging';
 import DEFAULTS from '../../config/defaults';
-import { HTTP_STATUS } from '../../config/http_status';
 import DeveloperDao from '../DeveloperDao';
 import { CompleteDevelopersResponseBody, CompletionParameters, Game } from '@steam-wiki/types';
 import ElasticConnector, { ElasticBaseDao } from './ElasticConnector';
-import { QueryContainer, TermsAggregation } from '@elastic/elasticsearch/api/types';
+import { TermsAggregation } from '@elastic/elasticsearch/api/types';
 import { DaoErrorHandler } from './utils/error_handler';
+import { getFuzzyFilter } from './utils/filters';
 
 const indexName = 'games';
 const NAMESPACE = 'DEVELOPER_DAO';
@@ -13,42 +12,15 @@ const NAMESPACE = 'DEVELOPER_DAO';
 const ElasticDeveloperDao: DeveloperDao = {
     ...ElasticBaseDao,
 
-    completeName(params: CompletionParameters): Promise<CompleteDevelopersResponseBody> {
+    completeName({ searchText, results }: CompletionParameters): Promise<CompleteDevelopersResponseBody> {
         return new Promise<CompleteDevelopersResponseBody>(async (resolve, reject) => {
             try {
-                const maxResultSize = params.results ?? DEFAULTS.autocompletion_results;
+                const maxResultSize = results ?? DEFAULTS.autocompletion_results;
 
-                let query: QueryContainer | undefined = undefined;
+                const setQuery = searchText.trim().length > 0;
+                const query = setQuery ? getFuzzyFilter(searchText, 'developer.fuzzy', 'developer.autocomplete') : undefined;
                 let order: TermsAggregation['order'] | undefined = undefined;
-                if (params.searchText !== undefined && params.searchText.length !== 0) {
-                    query = {
-                        bool: {
-                            should: [
-                                {
-                                    match: {
-                                        'developer.fuzzy': {
-                                            query: params.searchText,
-                                            fuzziness: 2,
-                                            prefix_length: 1,
-                                            boost: 2,
-                                        },
-                                    },
-                                },
-                                {
-                                    match_bool_prefix: {
-                                        'developer.autocomplete': {
-                                            query: params.searchText,
-                                            fuzziness: 2,
-                                            boost: 2,
-                                        },
-                                    },
-                                },
-                            ],
-                            minimum_should_match: 1,
-                        },
-                    };
-                }
-                if (params.searchText === undefined || params.searchText.length < 2) {
+                if (searchText === undefined || searchText.length < 2) {
                     order = {
                         _key: 'asc',
                     };
@@ -62,7 +34,7 @@ const ElasticDeveloperDao: DeveloperDao = {
                         aggs: {
                             unique_developers: {
                                 terms: {
-                                    field: 'developer',
+                                    field: 'publisher',
                                     size: maxResultSize,
                                     order,
                                 },
@@ -79,7 +51,7 @@ const ElasticDeveloperDao: DeveloperDao = {
                 const uniqueDevelopers = developers.map(({ key }: { key: string }) => key);
 
                 resolve({
-                    searchText: params.searchText,
+                    searchText,
                     maxResults: maxResultSize,
                     results: uniqueDevelopers,
                 });

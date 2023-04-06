@@ -20,11 +20,13 @@ export const HTTP_STATUS_CODE = {
     BadGateway: 502,
 };
 
+export type HTTP_STATUS_TYPE = {
+    code: number;
+    message: string;
+};
+
 export const HTTP_STATUS: {
-    [key: string]: {
-        code: number;
-        message: string;
-    };
+    [key: string]: HTTP_STATUS_TYPE;
 } = {
     Ok: { code: 200, message: 'Ok' },
     Created: { code: 201, message: 'Created' },
